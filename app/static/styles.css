@@ -1,0 +1,148 @@
+/* Estilos personalizados para el Planificador de Guardias Médicas */
+
+[x-cloak] {
+    display: none !important;
+}
+
+@media print {
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    @page {
+        size: A4 landscape;
+        margin: 6mm 10mm;
+    }
+
+    /* Ocultar elementos de navegación y control al imprimir */
+    header,
+    nav,
+    .no-print,
+    .auth-screen,
+    button,
+    .controls-panel,
+    .tabs-navigation,
+    footer {
+        display: none !important;
+    }
+
+    body {
+        background-color: white !important;
+        color: black !important;
+        font-size: 10pt !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    main {
+        padding: 0 !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Asegurar que la sección del calendario siempre se muestre al imprimir */
+    .calendar-tab-content {
+        display: block !important;
+    }
+
+    /* Ocultar las otras pestañas */
+    .tab-personal,
+    .tab-days,
+    .tab-matrix,
+    .tab-stats {
+        display: none !important;
+    }
+
+    .print-only {
+        display: block !important;
+    }
+
+    .print-container {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-shadow: none !important;
+        border: 1px solid #94a3b8 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        background-color: white !important;
+    }
+
+    /* Forzar que el calendario se vea nítido en hoja A4 landscape */
+    .calendar-grid {
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 1px !important;
+        background-color: #cbd5e1 !important;
+        page-break-inside: avoid !important;
+    }
+
+    .calendar-cell {
+        min-height: 80px !important;
+        border: 1px solid #cbd5e1 !important;
+        page-break-inside: avoid !important;
+    }
+
+    .badge-doctor {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        border: 1px solid rgba(0, 0, 0, 0.25) !important;
+        font-size: 8pt !important;
+        padding: 2px 4px !important;
+        margin-bottom: 2px !important;
+        color: white !important;
+        border-radius: 4px !important;
+        text-shadow: 0 0 1px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .print-badge-double {
+        border: 1px solid #3b82f6 !important;
+        font-size: 7.5pt !important;
+        background-color: #eff6ff !important;
+        color: #1d4ed8 !important;
+    }
+}
+
+.print-only {
+    display: none;
+}
+
+/* Scrollbar estilizado para la matriz de restricciones */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Transiciones suaves */
+.transition-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.transition-card:hover {
+    transform: translateY(-2px);
+}
+
+/* Reglas base para la cuadrícula del calendario mensual */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 1px;
+}
+
+.calendar-cell {
+    min-height: 110px;
+}

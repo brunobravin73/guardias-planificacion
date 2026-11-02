@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# Variables de entorno y secretos locales
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel/
+
+# Sistema operativo / IDE
+.DS_Store
+Thumbs.db

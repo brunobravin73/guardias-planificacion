@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedGuard • Planificador Inteligente de Guardias Médicas</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS v2 (versión fija) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.1/dist/umd/supabase.min.js"></script>
+    <!-- Alpine.js CDN (versión fija) -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col font-sans" x-data="schedulerApp()" x-init="init()">
+
+    <!-- Toast Notification -->
+    <div x-cloak
+         x-show="successToast"
+         x-transition:enter="transition ease-out duration-300 transform"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-200 transform"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         class="fixed bottom-6 right-6 z-50 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 border border-slate-700 max-w-md no-print">
+        <span class="text-emerald-400 text-xl font-bold">✓</span>
+        <span class="text-sm font-medium" x-text="successToast"></span>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA DE CARGA INICIAL                  -->
+    <!-- ========================================== -->
+    <div x-show="isBootstrapping" class="min-h-screen flex flex-col items-center justify-center p-6 no-print">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/25 mb-4 animate-pulse">
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+        </div>
+        <p class="text-sm font-semibold text-slate-700">Iniciando MedGuard...</p>
+        <p class="text-xs text-slate-400 mt-1">Verificando sesión y configuración</p>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- PANTALLA DE AUTENTICACIÓN MULTI-USUARIO    -->
+    <!-- ========================================== -->
+    <div x-cloak x-show="!isBootstrapping && supabaseEnabled && !user" class="auth-screen min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/50 no-print">
+        <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+
+            <!-- Columna Informativa -->
+            <div class="lg:col-span-5 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white p-8 flex flex-col justify-between">
+                <div class="space-y-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-white border border-white/20">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="text-xl font-extrabold tracking-tight">MedGuard Cloud</h1>
+                            <p class="text-xs text-blue-100">Planificación Inteligente de Guardias</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 pt-2">
+                        <h2 class="text-lg font-bold leading-snug">
+                            Cada servicio médico con su propio plantel y calendarios en la nube.
+                        </h2>
+                        <ul class="space-y-3 text-xs text-blue-50">
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">✓</span>
+                                <span><strong>Plantel Médico Propio:</strong> Tus profesionales, colores y cuotas mensuales quedan guardados automáticamente en tu cuenta.</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">✓</span>
+                                <span><strong>Historial Mensual:</strong> Consulta, edita e imprime en A4 apaisado los roles de cualquier mes y año.</span>
+                            </li>
+                            <li class="flex items-start gap-2.5">
+                                <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">✓</span>
+                                <span><strong>Optimización Exacta CP-SAT:</strong> Descanso post-guardia obligatorio de 24h y reparto equitativo de jueves y fines de semana.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="pt-8 text-[11px] text-blue-200 border-t border-white/15 mt-8">
+                    Datos aislados y protegidos con seguridad a nivel de fila (Row-Level Security).
+                </div>
+            </div>
+
+            <!-- Columna de Formulario (Login / Registro / Recuperación) -->
+            <div class="lg:col-span-7 p-8 sm:p-10 flex flex-col justify-center">
+                <!-- Selector de pestaña Iniciar Sesión / Crear Cuenta -->
+                <div class="flex rounded-xl bg-slate-100 p-1 mb-6" x-show="authMode !== 'reset'">
+                    <button type="button"
+                            @click="switchAuthMode('login')"
+                            :class="authMode === 'login' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                            class="flex-1 py-2 text-xs rounded-lg transition">
+                        Iniciar Sesión
+                    </button>
+                    <button type="button"
+                            @click="switchAuthMode('signup')"
+                            :class="authMode === 'signup' ? 'bg-white text-slate-900 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                            class="flex-1 py-2 text-xs rounded-lg transition">
+                        Crear Cuenta Nueva
+                    </button>
+                </div>
+
+                <div class="mb-5">
+                    <h3 class="text-xl font-bold text-slate-900"
+                        x-text="authMode === 'login' ? 'Bienvenido/a nuevamente' : (authMode === 'signup' ? 'Crea tu cuenta de servicio médico' : 'Recuperar contraseña')">
+                    </h3>
+                    <p class="text-xs text-slate-500 mt-1"
+                       x-text="authMode === 'login' ? 'Ingresa con tu correo para acceder a tu plantel y calendarios.' : (authMode === 'signup' ? 'Regístrate gratis para gestionar tus propios médicos y roles mensuales.' : 'Te enviaremos un enlace seguro para restablecer tu clave.')">
+                    </p>
+                </div>
+
+                <!-- Mensajes de Error o Confirmación -->
+                <div x-show="authError" class="mb-4 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-medium flex items-start gap-2">
+                    <span class="font-bold">⚠️</span>
+                    <span x-text="authError"></span>
+                </div>
+
+                <div x-show="authInfo" class="mb-4 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 font-medium flex items-start gap-2">
+                    <span class="font-bold">✉️</span>
+                    <span x-text="authInfo"></span>
+                </div>
+
+                <form @submit.prevent="submitAuth()" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Correo Electrónico</label>
+                        <input type="email" required autocomplete="email"
+                               x-model="authForm.email"
+                               placeholder="nombre@hospital.org"
+                               class="w-full text-sm bg-slate-50 focus:bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+
+                    <div x-show="authMode !== 'reset'">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-xs font-semibold text-slate-700">Contraseña</label>
+                            <button type="button" x-show="authMode === 'login'" @click="switchAuthMode('reset')" class="text-[11px] text-blue-600 hover:text-blue-800 font-medium">
+                                ¿Olvidaste tu contraseña?
+                            </button>
+                        </div>
+                        <div class="relative">
+                            <input :type="showPassword ? 'text' : 'password'"
+                                   :required="authMode !== 'reset'"
+                                   autocomplete="current-password"
+                                   x-model="authForm.password"
+                                   placeholder="Mínimo 6 caracteres"
+                                   class="w-full text-sm bg-slate-50 focus:bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 pr-16 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                            <button type="button" @click="showPassword = !showPassword" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 hover:text-slate-700 font-medium">
+                                <span x-text="showPassword ? 'Ocultar' : 'Mostrar'"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div x-show="authMode === 'signup'">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Confirmar Contraseña</label>
+                        <input :type="showPassword ? 'text' : 'password'"
+                               :required="authMode === 'signup'"
+                               autocomplete="new-password"
+                               x-model="authForm.confirmPassword"
+                               placeholder="Repite tu contraseña"
+                               class="w-full text-sm bg-slate-50 focus:bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                    </div>
+
+                    <button type="submit" :disabled="authBusy"
+                            class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-sm py-2.5 px-4 rounded-xl shadow-sm shadow-blue-500/20 transition flex items-center justify-center gap-2">
+                        <svg x-show="authBusy" class="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span x-text="authBusy ? 'Procesando...' : (authMode === 'login' ? 'Ingresar a mi Cuenta' : (authMode === 'signup' ? 'Crear Cuenta Gratis' : 'Enviar Enlace de Recuperación'))"></span>
+                    </button>
+
+                    <div x-show="authMode === 'reset'" class="text-center pt-2">
+                        <button type="button" @click="switchAuthMode('login')" class="text-xs text-slate-600 hover:text-slate-900 font-semibold">
+                            ← Volver a Iniciar Sesión
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- APLICACIÓN PRINCIPAL (USUARIO AUTENTICADO) -->
+    <!-- ========================================== -->
+    <div x-cloak x-show="!isBootstrapping && (!supabaseEnabled || user)" class="min-h-screen flex flex-col">
+
+        <!-- Header Principal -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+                <!-- Logo, Título y Estado de Guardado en Nube -->
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-lg font-bold text-slate-900 tracking-tight">MedGuard</h1>
+                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold uppercase tracking-wider">CP-SAT</span>
+
+                            <!-- Indicador de Persistencia en Supabase -->
+                            <template x-if="supabaseEnabled && user">
+                                <div>
+                                    <span x-show="syncStatus === 'saving'" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                                        Guardando...
+                                    </span>
+                                    <span x-show="syncStatus === 'saved'" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium" :title="lastSyncedAt ? `Última sincronización: ${lastSyncedAt}` : ''">
+                                        <span>☁️</span> Guardado
+                                    </span>
+                                    <button x-show="syncStatus === 'error'" @click="flushPendingSaves()" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-semibold hover:bg-rose-100 transition">
+                                        ⚠️ Error al guardar • Reintentar
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <p class="text-xs text-slate-500 font-normal">Planificación Equitativa de Guardias Médicas • No Consecutivas</p>
+                    </div>
+                </div>
+
+                <!-- Controles Globales (Mes, Año, País, Botón Resolver, Cuenta) -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- Selector de Mes -->
+                    <select x-model.number="month" @change="onPeriodChange()" class="text-sm font-medium bg-slate-100 border-none rounded-lg px-3 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer transition">
+                        <option value="1">Enero</option>
+                        <option value="2">Febrero</option>
+                        <option value="3">Marzo</option>
+                        <option value="4">Abril</option>
+                        <option value="5">Mayo</option>
+                        <option value="6">Junio</option>
+                        <option value="7">Julio</option>
+                        <option value="8">Agosto</option>
+                        <option value="9">Septiembre</option>
+                        <option value="10">Octubre</option>
+                        <option value="11">Noviembre</option>
+                        <option value="12">Diciembre</option>
+                    </select>
+
+                    <!-- Selector de Año -->
+                    <input type="number" x-model.number="year" @change="onPeriodChange()" min="2020" max="2035" class="w-20 text-sm font-medium bg-slate-100 border-none rounded-lg px-2.5 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white text-center cursor-pointer transition">
+
+                    <!-- Selector de País de Feriados -->
+                    <select x-model="countryCode" @change="onCountryChange()" class="text-sm font-medium bg-slate-100 border-none rounded-lg px-2.5 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer transition">
+                        <template x-for="c in supportedCountries" :key="c.code">
+                            <option :value="c.code" x-text="`${c.code} - ${c.name}`"></option>
+                        </template>
+                    </select>
+
+                    <!-- Botón Cargar Ejemplo -->
+                    <button @click="loadDemoData(true)" title="Carga 6 médicos de ejemplo, días dobles balanceados y bloqueos de prueba" class="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Demo
+                    </button>
+
+                    <!-- Botón Principal: Generar Calendario -->
+                    <button @click="generateSchedule()"
+                            :disabled="isSolving"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-sm px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md transition flex items-center gap-2">
+                        <template x-if="isSolving">
+                            <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </template>
+                        <template x-if="!isSolving">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        </template>
+                        <span x-text="isSolving ? 'Calculando...' : 'Generar Calendario'"></span>
+                    </button>
+
+                    <!-- Cuenta de Usuario y Cerrar Sesión -->
+                    <template x-if="supabaseEnabled && user">
+                        <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+                            <span class="hidden xl:inline-block text-xs font-medium text-slate-600 max-w-[160px] truncate" :title="user.email" x-text="user.email"></span>
+                            <button @click="signOut()" title="Cerrar sesión" class="text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-2 rounded-lg transition flex items-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                <span class="hidden sm:inline">Salir</span>
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Barra de Pestañas / Navegación -->
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between border-t border-slate-100 overflow-x-auto gap-4">
+                <nav class="flex space-x-1 sm:space-x-4">
+                    <button @click="activeTab = 'calendar'"
+                            :class="activeTab === 'calendar' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
+                        <span>📅</span> Calendario Mensual
+                        <template x-if="schedule.length > 0">
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-bold">Listo</span>
+                        </template>
+                    </button>
+
+                    <button @click="activeTab = 'personal'"
+                            :class="activeTab === 'personal' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
+                        <span>👥</span> Personal Médico
+                        <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full font-bold" x-text="`${activeDoctorsCount}`"></span>
+                    </button>
+
+                    <button @click="activeTab = 'days'"
+                            :class="activeTab === 'days' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
+                        <span>⚙️</span> Guardias Dobles y Feriados
+                        <span :class="isBalanceOk ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" class="text-xs px-2 py-0.5 rounded-full font-bold" x-text="isBalanceOk ? 'Equilibrado' : 'Ajustar'"></span>
+                    </button>
+
+                    <button @click="activeTab = 'matrix'"
+                            :class="activeTab === 'matrix' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
+                        <span>🚫</span> Matriz de Indisponibilidad
+                    </button>
+
+                    <button @click="activeTab = 'stats'"
+                            :class="activeTab === 'stats' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
+                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
+                        <span>📊</span> Auditoría y Estadísticas
+                    </button>
+                </nav>
+
+                <!-- Accesos rápidos a meses guardados por el usuario -->
+                <template x-if="savedMonths.length > 0">
+                    <div class="hidden lg:flex items-center gap-1.5 py-1.5 shrink-0">
+                        <span class="text-[11px] text-slate-400 font-medium">Guardados:</span>
+                        <template x-for="sm in savedMonths.slice(0, 4)" :key="`${sm.year}-${sm.month}`">
+                            <button @click="jumpToSavedMonth(sm)"
+                                    :class="(sm.year === year && sm.month === month) ? 'bg-blue-600 text-white font-bold' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium'"
+                                    class="text-[11px] px-2 py-0.5 rounded-md transition flex items-center gap-1">
+                                <span x-text="`${getMonthShortName(sm.month)} ${sm.year}`"></span>
+                                <span x-show="sm.solved_at" class="text-[9px]">✓</span>
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </header>
+
+        <!-- Contenido Principal -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+
+            <!-- Tarjeta de Bienvenida para Cuenta Nueva (0 médicos cargados) -->
+            <div x-show="doctors.length === 0 && !isLoadingWorkspace" class="mb-6 p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md no-print flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <h2 class="text-base font-bold">¡Tu espacio de planificación está listo!</h2>
+                    <p class="text-xs text-blue-100">
+                        Comienza agregando los profesionales de tu servicio médico (se guardarán automáticamente en tu cuenta) o prueba con un plantel de ejemplo editable.
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+                    <button @click="activeTab = 'personal'" class="bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition">
+                        ➕ Cargar mi Plantel Médico
+                    </button>
+                    <button @click="loadDemoData(false)" class="bg-blue-500/40 hover:bg-blue-500/60 text-white border border-white/30 font-semibold text-xs px-4 py-2.5 rounded-xl transition">
+                        ✨ Probar con 6 Médicos de Ejemplo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Banner de Balance de Cupos -->
+            <div x-show="doctors.length > 0"
+                 class="mb-6 p-4 rounded-xl border no-print flex flex-col md:flex-row items-center justify-between gap-4 transition"
+                 :class="isBalanceOk ? 'bg-emerald-50/70 border-emerald-200' : 'bg-amber-50/70 border-amber-200'">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                         :class="isBalanceOk ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">
+                        <span x-text="isBalanceOk ? '✅' : '⚖️'"></span>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900">
+                            Balance de Guardias del Mes:
+                            <span class="text-slate-700" x-text="`${activeDoctorsCount} médicos activos • ${totalCapacity} guardias programadas (${(totalCapacity / (activeDoctorsCount || 1)).toFixed(1)} prom/médico)`"></span>
+                        </h3>
+                        <p class="text-xs text-slate-600" x-show="isBalanceOk">
+                            La suma de turnos del mes coincide exactamente con la cuota total requerida. La asignación matemática es factible.
+                        </p>
+                        <p class="text-xs text-amber-800 font-medium" x-show="!isBalanceOk" x-text="`Diferencia: ${quotaBalanceDiff > 0 ? 'Sobran ' + quotaBalanceDiff : 'Faltan ' + Math.abs(quotaBalanceDiff)} cupos de guardia. Se requieren ${totalCapacity} turnos en total según las cuotas individuales.`"></p>
+                    </div>
+                </div>
+
+                <!-- Botones de Acción Rápida para el Balance -->
+                <div class="flex items-center gap-2">
+                    <button @click="autoBalanceDoubles()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                        <span>✨</span> Auto-balancear Días Dobles
+                    </button>
+                    <div class="text-xs text-slate-500 hidden sm:block">
+                        Total Cupos: <strong class="text-slate-800" x-text="totalSlotsRequired"></strong> / <span x-text="totalCapacity"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 1: CALENDARIO MENSUAL RESULTANTE   -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'calendar'" class="space-y-6 calendar-tab-content">
+
+                <!-- Barra de Herramientas del Calendario -->
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm no-print">
+                    <div class="flex items-center gap-3 flex-wrap">
+                        <h2 class="text-lg font-bold text-slate-900 tracking-tight" x-text="`${monthName} ${year}`"></h2>
+                        <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium" x-text="`${summary ? summary.total_days : days.length} días • ${totalSlotsRequired} turnos totales`"></span>
+                        <template x-if="lastSolvedAt">
+                            <span class="text-xs text-slate-400">Calculado: <span x-text="lastSolvedAt"></span></span>
+                        </template>
+                    </div>
+
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button @click="exportCSV()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Descargar CSV
+                        </button>
+                        <button @click="printSchedule()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                            Imprimir / PDF
+                        </button>
+                        <button @click="exportJSON()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                            Exportar JSON
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Encabezado para impresión únicamente -->
+                <div class="print-only mb-4 text-center">
+                    <h1 class="text-2xl font-bold uppercase tracking-wider text-slate-900">Planificación Mensual de Guardias Médicas</h1>
+                    <p class="text-base text-slate-700 font-semibold" x-text="`Rol de Guardias: ${monthName} ${year}`"></p>
+                    <p class="text-xs text-slate-500 mt-0.5">Horario de guardia: 08:00 AM a 08:00 AM del día siguiente • Descanso obligatorio post-guardia de 24 horas</p>
+                </div>
+
+                <!-- Grilla del Calendario (7 columnas: Lunes a Domingo) -->
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-container">
+                    <!-- Días de la semana header -->
+                    <div class="grid grid-cols-7 bg-slate-50 border-b border-slate-200 text-center py-2.5 text-xs font-bold text-slate-600 tracking-wider uppercase">
+                        <div>Lunes</div>
+                        <div>Martes</div>
+                        <div>Miércoles</div>
+                        <div class="text-purple-700 flex items-center justify-center gap-1">
+                            <span>Jueves</span>
+                            <span class="text-[10px] bg-purple-100 text-purple-800 px-1 rounded no-print">⭐ Clave</span>
+                        </div>
+                        <div>Viernes</div>
+                        <div class="text-blue-700">Sábado</div>
+                        <div class="text-blue-700">Domingo</div>
+                    </div>
+
+                    <!-- Celdas de días con UN SOLO elemento raíz por cada iteración del template -->
+                    <div class="grid grid-cols-7 auto-rows-fr gap-[1px] bg-slate-200 calendar-grid">
+                        <template x-for="item in getCalendarGridDays()" :key="item.empty ? item.id : item.day">
+                            <div class="calendar-cell min-h-[110px] p-2.5 flex flex-col justify-between transition relative border border-slate-100"
+                                 :class="{
+                                     'bg-slate-50/50': item.empty,
+                                     'bg-purple-50/40': !item.empty && item.is_thursday,
+                                     'bg-blue-50/30': !item.empty && item.is_weekend,
+                                     'bg-amber-50/40': !item.empty && item.is_holiday,
+                                     'bg-white': !item.empty && !item.is_thursday && !item.is_weekend && !item.is_holiday
+                                 }">
+
+                                <!-- Contenido del día -->
+                                <div x-show="!item.empty" class="w-full h-full flex flex-col justify-between">
+                                    <!-- Cabecera de celda: Número de día y badges -->
+                                    <div class="flex items-start justify-between gap-1 mb-1.5">
+                                        <span class="text-base font-extrabold"
+                                              :class="{
+                                                  'text-purple-700': item.is_thursday,
+                                                  'text-blue-700': item.is_weekend,
+                                                  'text-amber-800': item.is_holiday,
+                                                  'text-slate-800': !item.is_thursday && !item.is_weekend && !item.is_holiday
+                                              }"
+                                              x-text="item.day">
+                                        </span>
+
+                                        <div class="flex flex-col items-end gap-0.5">
+                                            <span x-show="item.required_shifts === 0" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                                                Libre (0)
+                                            </span>
+                                            <span x-show="item.required_shifts === 2" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200 print-badge-double">
+                                                Doble (2)
+                                            </span>
+                                            <span x-show="item.required_shifts >= 3" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">
+                                                Triple (3)
+                                            </span>
+
+                                            <span x-show="item.is_holiday" class="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200 max-w-[120px] truncate"
+                                                  :title="item.holiday_name"
+                                                  x-text="item.holiday_name || 'Feriado'">
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Lista de Médicos Asignados en este día -->
+                                    <div class="space-y-1.5 my-auto">
+                                        <template x-for="(doc, idx) in item.assigned_doctors" :key="doc.doctor_id">
+                                            <div class="px-2 py-1 rounded-md text-xs font-semibold text-white shadow-sm flex items-center justify-between gap-1 badge-doctor"
+                                                 :style="`background-color: ${doc.doctor_color};`">
+                                                <div class="flex items-center gap-1.5 truncate">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-white opacity-90 shrink-0"></span>
+                                                    <span class="truncate font-medium" x-text="doc.doctor_name"></span>
+                                                </div>
+                                                <span x-show="item.required_shifts >= 2" class="text-[9px] bg-black/25 px-1 rounded font-mono shrink-0" x-text="`#${idx + 1}`"></span>
+                                            </div>
+                                        </template>
+
+                                        <!-- Si aún no se ha generado solución -->
+                                        <div x-show="item.required_shifts > 0 && (!item.assigned_doctors || item.assigned_doctors.length === 0)" class="text-[11px] text-slate-400 italic py-2 text-center bg-slate-50 rounded border border-dashed border-slate-200 no-print">
+                                            Sin asignar
+                                        </div>
+                                    </div>
+
+                                    <!-- Footer de celda: Indicador de día de la semana -->
+                                    <div class="text-[10px] text-slate-400 text-right mt-1 no-print">
+                                        <span x-text="item.weekday_name"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Informativa de Reglas Cumplidas -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 no-print">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-base" x-text="defaultTargetShifts"></div>
+                        <div>
+                            <div class="text-xs text-slate-500 font-medium">Cuotas Mensuales</div>
+                            <div class="text-sm font-bold text-slate-900" x-text="`${(totalCapacity / (activeDoctorsCount || 1)).toFixed(1)} prom. / médico`"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">24h</div>
+                        <div>
+                            <div class="text-xs text-slate-500 font-medium">Descanso Post-Guardia</div>
+                            <div class="text-sm font-bold text-slate-900">No días consecutivos</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">⭐</div>
+                        <div>
+                            <div class="text-xs text-slate-500 font-medium">Jueves Deseados</div>
+                            <div class="text-sm font-bold text-slate-900">Reparto equitativo</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">👥</div>
+                        <div>
+                            <div class="text-xs text-slate-500 font-medium">Guardias Dobles</div>
+                            <div class="text-sm font-bold text-slate-900" x-text="`${days.filter(d => d.required_shifts === 2).length} fechas con 2 médicos`"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 2: CONFIGURACIÓN DE PERSONAL       -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'personal'" class="space-y-6 tab-personal">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Personal Médico y Cuotas de Guardia</h2>
+                            <p class="text-xs text-slate-500">Tu plantel médico se guarda automáticamente en tu cuenta y se reutiliza en todos los meses.</p>
+                        </div>
+
+                        <!-- Presets Rápidos -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-xs text-slate-500 font-medium mr-1">Plantillas rápidas:</span>
+                            <button @click="setDoctorsPreset(5)" class="text-xs px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">5 Médicos</button>
+                            <button @click="setDoctorsPreset(6)" class="text-xs px-2.5 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold transition">6 Médicos</button>
+                            <button @click="setDoctorsPreset(8)" class="text-xs px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">8 Médicos</button>
+                            <button @click="setDoctorsPreset(10)" class="text-xs px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition">10 Médicos</button>
+                        </div>
+                    </div>
+
+                    <!-- Panel Superior de Cuotas Mensuales y Modo de Asignación -->
+                    <div class="bg-gradient-to-r from-blue-50/70 to-indigo-50/70 p-4 rounded-xl border border-blue-200 flex flex-col md:flex-row items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-lg">
+                                🎯
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-900">Modificador Global de Cuotas Mensuales</h3>
+                                <p class="text-xs text-slate-600">Ajusta la cuota base para todo el equipo o personaliza individualmente cada tarjeta.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-3">
+                            <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-sm">
+                                <span class="text-xs font-semibold text-slate-700">Cuota base:</span>
+                                <button type="button" @click="defaultTargetShifts = Math.max(0, defaultTargetShifts - 1); scheduleMonthlySave()" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">-</button>
+                                <input type="number" min="0" max="31" x-model.number="defaultTargetShifts" @change="scheduleMonthlySave()" class="w-10 text-center font-bold text-sm bg-transparent border-none p-0 focus:ring-0">
+                                <button type="button" @click="defaultTargetShifts = Math.min(31, defaultTargetShifts + 1); scheduleMonthlySave()" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">+</button>
+                                <button type="button" @click="applyDefaultTargetToAll()" class="text-[11px] font-bold px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white transition ml-1">
+                                    Aplicar a todos
+                                </button>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-sm text-xs">
+                                <label class="inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" x-model="strictQuota" @change="scheduleMonthlySave()" class="sr-only peer">
+                                    <div class="relative w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    <span class="ms-2 font-semibold" :class="strictQuota ? 'text-blue-700' : 'text-slate-600'" x-text="strictQuota ? '🔒 Cuota Estricta' : '⚖️ Cuota Flexible'"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Formulario para agregar médico -->
+                    <form @submit.prevent="addDoctor()" class="flex flex-col sm:flex-row items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div class="flex-1 w-full">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Nombre y Especialidad</label>
+                            <input type="text" x-model="newDoctor.name" placeholder="Ej. Dr. Morales (Neurología)" class="w-full text-sm bg-white border border-slate-300 rounded-lg px-3.5 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                        </div>
+
+                        <div class="w-full sm:w-28">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Guardias/mes</label>
+                            <input type="number" min="0" max="31" x-model.number="newDoctor.target_shifts" class="w-full text-sm bg-white border border-slate-300 rounded-lg px-2.5 py-2 text-center focus:ring-2 focus:ring-blue-500 font-bold">
+                        </div>
+
+                        <div class="w-full sm:w-auto">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Color</label>
+                            <div class="flex items-center gap-2">
+                                <input type="color" x-model="newDoctor.color" class="w-10 h-9 p-0.5 rounded border border-slate-300 cursor-pointer">
+                            </div>
+                        </div>
+
+                        <div class="w-full sm:w-auto sm:self-end">
+                            <button type="submit" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2 rounded-lg transition flex items-center justify-center gap-2 shadow-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                Agregar Profesional
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Estado vacío si aún no hay médicos -->
+                    <div x-show="doctors.length === 0" class="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+                        <p class="text-sm font-semibold text-slate-700">Aún no hay médicos en tu plantel</p>
+                        <p class="text-xs text-slate-500 mt-1">Usa el formulario superior para agregar a tus profesionales o selecciona una plantilla rápida.</p>
+                    </div>
+
+                    <!-- Grid de Tarjetas de Médicos con Edición Persistente en Línea -->
+                    <div x-show="doctors.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <template x-for="(doc, index) in doctors" :key="doc.id">
+                            <div class="p-4 rounded-xl border transition-card bg-white relative flex flex-col justify-between"
+                                 :class="doc.active ? 'border-slate-200 shadow-sm' : 'border-slate-200 bg-slate-50 opacity-60'">
+
+                                <div>
+                                    <div class="flex items-center justify-between gap-2 mb-3">
+                                        <div class="flex items-center gap-2 flex-1 min-w-0">
+                                            <input type="color" x-model="doc.color" @change="scheduleDoctorSave(doc)" title="Cambiar color" class="w-6 h-6 p-0 border-0 rounded cursor-pointer shrink-0 bg-transparent">
+                                            <span class="text-xs font-bold text-slate-400 font-mono shrink-0" x-text="`#${index + 1}`"></span>
+                                            <input type="text" x-model="doc.name" @change="scheduleDoctorSave(doc)"
+                                                   class="text-sm font-bold text-slate-900 bg-transparent hover:bg-slate-50 focus:bg-white border border-transparent focus:border-blue-400 rounded px-1.5 py-0.5 w-full truncate focus:outline-none transition"
+                                                   title="Haz clic para editar el nombre">
+                                        </div>
+                                        <button @click="removeDoctor(doc.id)" title="Eliminar médico" class="text-slate-400 hover:text-red-500 p-1 rounded transition shrink-0">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100 items-center">
+                                        <div>
+                                            <span class="text-slate-500 block mb-1">Cuota mensual:</span>
+                                            <div class="flex items-center gap-1">
+                                                <button type="button" @click="changeDoctorTarget(doc, -1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">-</button>
+                                                <input type="number" min="0" max="31" x-model.number="doc.target_shifts" @change="scheduleDoctorSave(doc)" class="w-11 text-center font-bold text-xs bg-slate-50 border border-slate-300 rounded py-0.5 focus:ring-1 focus:ring-blue-500">
+                                                <button type="button" @click="changeDoctorTarget(doc, 1)" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">+</button>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-slate-500">Bloqueos (<span x-text="getMonthShortName(month)"></span>):</span>
+                                            <span class="font-bold ml-1"
+                                                  :class="getBlockedCount(doc.id) > 0 ? 'text-amber-700' : 'text-slate-600'"
+                                                  x-text="`${getBlockedCount(doc.id)} días`">
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between mt-3 pt-2">
+                                    <label class="inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" :checked="doc.active" @change="toggleDoctorActive(doc)" class="sr-only peer">
+                                        <div class="relative w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                        <span class="ms-2 text-xs font-medium text-slate-700" x-text="doc.active ? 'Activo' : 'Inactivo'"></span>
+                                    </label>
+
+                                    <button @click="activeTab = 'matrix'; rangeBlock.doctorId = doc.id;" class="text-xs text-blue-600 hover:text-blue-800 font-medium">
+                                        Gestionar Bloqueos →
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 3: GUARDIAS DOBLES Y FERIADOS      -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'days'" class="space-y-6 tab-days">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Configuración de Días y Guardias Simultáneas (Dobles)</h2>
+                            <p class="text-xs text-slate-500">Configura qué fechas de <span class="font-semibold" x-text="`${monthName} ${year}`"></span> requieren 0, 1, 2 o 3 médicos en paralelo.</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button @click="setAllWeekendsDouble()" class="text-xs px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 font-semibold transition">
+                                Fines de Semana Dobles
+                            </button>
+                            <button @click="setAllHolidaysDouble()" class="text-xs px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 hover:bg-amber-100 font-semibold transition">
+                                Feriados Dobles
+                            </button>
+                            <button @click="clearAllDoubles()" class="text-xs px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium transition">
+                                Restablecer Simples (1)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-600 uppercase text-xs border-y border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4">Día</th>
+                                    <th class="py-3 px-4">Fecha</th>
+                                    <th class="py-3 px-4">Día de Semana</th>
+                                    <th class="py-3 px-4">Tipo de Día</th>
+                                    <th class="py-3 px-4">Feriado Detectado</th>
+                                    <th class="py-3 px-4 text-center">Médicos Requeridos</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="day in days" :key="day.day">
+                                    <tr :class="{'bg-purple-50/40': day.is_thursday, 'bg-blue-50/30': day.is_weekend, 'bg-amber-50/30': day.is_holiday}">
+                                        <td class="py-2.5 px-4 font-extrabold text-slate-900" x-text="day.day"></td>
+                                        <td class="py-2.5 px-4 text-xs font-mono text-slate-600" x-text="day.date"></td>
+                                        <td class="py-2.5 px-4 font-medium" x-text="day.weekday_name"></td>
+                                        <td class="py-2.5 px-4">
+                                            <div class="flex items-center gap-1.5 flex-wrap">
+                                                <template x-if="day.is_thursday">
+                                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800">⭐ Jueves</span>
+                                                </template>
+                                                <template x-if="day.is_weekend">
+                                                    <span class="text-[11px] font-medium px-2 py-0.5 rounded bg-blue-100 text-blue-700">Fin de Semana</span>
+                                                </template>
+                                                <template x-if="day.is_holiday">
+                                                    <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-800">🎉 Feriado</span>
+                                                </template>
+                                            </div>
+                                        </td>
+                                        <td class="py-2.5 px-4 text-xs text-slate-700 font-medium">
+                                            <span x-text="day.holiday_name || '-'"></span>
+                                        </td>
+                                        <td class="py-2.5 px-4 text-center">
+                                            <div class="inline-flex rounded-lg border border-slate-200 p-0.5 bg-slate-100 gap-0.5 shadow-sm">
+                                                <button type="button" @click="setRequiredShifts(day, 0)"
+                                                        :class="day.required_shifts === 0 ? 'bg-slate-700 text-white font-bold' : 'text-slate-600 hover:text-slate-900'"
+                                                        class="px-2 py-1 rounded text-xs transition" title="0: Sin guardia (Servicio libre o cerrado)">
+                                                    0
+                                                </button>
+                                                <button type="button" @click="setRequiredShifts(day, 1)"
+                                                        :class="day.required_shifts === 1 ? 'bg-blue-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900'"
+                                                        class="px-2 py-1 rounded text-xs transition" title="1: Guardia simple (1 médico)">
+                                                    1
+                                                </button>
+                                                <button type="button" @click="setRequiredShifts(day, 2)"
+                                                        :class="day.required_shifts === 2 ? 'bg-indigo-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900'"
+                                                        class="px-2 py-1 rounded text-xs transition" title="2: Guardia doble (2 médicos)">
+                                                    2
+                                                </button>
+                                                <button type="button" @click="setRequiredShifts(day, 3)"
+                                                        :class="day.required_shifts === 3 ? 'bg-purple-600 text-white font-bold' : 'text-slate-600 hover:text-slate-900'"
+                                                        class="px-2 py-1 rounded text-xs transition" title="3: Guardia triple (3 médicos)">
+                                                    3
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 4: MATRIZ DE INDISPONIBILIDAD      -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'matrix'" class="space-y-6 tab-matrix">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Matriz Interactiva de Indisponibilidad (<span x-text="`${monthName} ${year}`"></span>)</h2>
+                            <p class="text-xs text-slate-500">Haz clic en cualquier celda para bloquear o desbloquear fechas específicas por congresos, licencias o descansos.</p>
+                        </div>
+
+                        <div class="flex items-center gap-3 text-xs">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-4 h-4 rounded bg-emerald-500 flex items-center justify-center text-white text-[10px]">✓</span>
+                                <span class="text-slate-600">Disponible</span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-4 h-4 rounded bg-rose-600 flex items-center justify-center text-white text-[10px]">✕</span>
+                                <span class="text-slate-600 font-semibold text-rose-700">Bloqueado (No disponible)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bloqueador Rápido por Rango -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-wrap items-center gap-3">
+                        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Bloqueo por Rango:</span>
+
+                        <select x-model="rangeBlock.doctorId" class="text-xs font-medium bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700">
+                            <template x-for="doc in activeDoctors" :key="doc.id">
+                                <option :value="doc.id" x-text="doc.name"></option>
+                            </template>
+                        </select>
+
+                        <div class="flex items-center gap-1 text-xs text-slate-600">
+                            <span>Desde el día</span>
+                            <input type="number" min="1" :max="days.length" x-model.number="rangeBlock.startDay" class="w-14 text-center bg-white border border-slate-300 rounded-md py-1 text-xs">
+                            <span>hasta el día</span>
+                            <input type="number" min="1" :max="days.length" x-model.number="rangeBlock.endDay" class="w-14 text-center bg-white border border-slate-300 rounded-md py-1 text-xs">
+                        </div>
+
+                        <button @click="applyRangeBlock()" class="bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">
+                            Bloquear Rango
+                        </button>
+                    </div>
+
+                    <!-- Grilla / Matriz Horizontal Scrollable -->
+                    <div class="overflow-x-auto custom-scrollbar border border-slate-200 rounded-xl">
+                        <table class="w-full text-center border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 text-xs font-bold border-b border-slate-200">
+                                    <th class="sticky left-0 bg-slate-100 z-10 py-3 px-3 text-left min-w-[200px] border-r border-slate-200">Profesional</th>
+                                    <template x-for="day in days" :key="day.day">
+                                        <th class="py-2 px-1 text-[11px] font-mono min-w-[32px] border-r border-slate-200"
+                                            :class="{'bg-purple-100 text-purple-900': day.is_thursday, 'bg-blue-100 text-blue-900': day.is_weekend}">
+                                            <div x-text="day.day"></div>
+                                            <div class="text-[9px] uppercase font-normal opacity-75" x-text="day.weekday_name.substring(0, 2)"></div>
+                                        </th>
+                                    </template>
+                                    <th class="py-3 px-3 text-xs min-w-[90px]">Bloqueados</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 text-xs">
+                                <template x-for="doc in activeDoctors" :key="doc.id">
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="sticky left-0 bg-white z-10 py-2.5 px-3 text-left font-semibold text-slate-800 border-r border-slate-200 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.05)]">
+                                            <div class="flex items-center justify-between gap-1">
+                                                <div class="flex items-center gap-2 truncate">
+                                                    <span class="w-2.5 h-2.5 rounded-full shrink-0" :style="`background-color: ${doc.color};`"></span>
+                                                    <span class="truncate" x-text="doc.name"></span>
+                                                </div>
+                                                <button @click="clearDoctorRestrictions(doc.id)" title="Limpiar bloqueos" class="text-slate-300 hover:text-slate-600 text-[10px] ml-1">
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </td>
+
+                                        <template x-for="day in days" :key="day.day">
+                                            <td class="p-0.5 border-r border-slate-200">
+                                                <button @click="toggleBlock(doc.id, day.day)"
+                                                        :class="isDayBlocked(doc.id, day.day) ? 'bg-rose-600 text-white font-bold' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'"
+                                                        class="w-full h-8 rounded flex items-center justify-center text-xs transition">
+                                                    <span x-text="isDayBlocked(doc.id, day.day) ? '✕' : ''"></span>
+                                                </button>
+                                            </td>
+                                        </template>
+
+                                        <td class="py-2 px-3 font-bold text-slate-700" x-text="`${getBlockedCount(doc.id)} d`"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================== -->
+            <!-- PESTAÑA 5: AUDITORÍA Y ESTADÍSTICAS        -->
+            <!-- ========================================== -->
+            <div x-show="activeTab === 'stats'" class="space-y-6 tab-stats">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Auditoría de Cumplimiento y Estadísticas</h2>
+                            <p class="text-xs text-slate-500">Verifica matemáticamente que cada médico cumpla su cuota configurada de guardias, el reparto de jueves y el descanso legal de 24 horas.</p>
+                        </div>
+
+                        <template x-if="summary">
+                            <div class="flex items-center gap-3 flex-wrap">
+                                <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold" x-show="summary.strict_quota_met">
+                                    ✓ Cuotas 100% Cumplidas
+                                </span>
+                                <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold" x-show="summary.perfect_consecutive_rest">
+                                    ✓ Cero Días Consecutivos
+                                </span>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-slate-50 text-slate-600 uppercase text-xs border-y border-slate-200">
+                                <tr>
+                                    <th class="py-3 px-4">Médico</th>
+                                    <th class="py-3 px-4 text-center">Guardias Asignadas</th>
+                                    <th class="py-3 px-4 text-center">Cuota Meta</th>
+                                    <th class="py-3 px-4 text-center text-purple-700">Jueves Asignados</th>
+                                    <th class="py-3 px-4 text-center text-blue-700">Fines de Semana</th>
+                                    <th class="py-3 px-4 text-center text-amber-700">Feriados</th>
+                                    <th class="py-3 px-4 text-center">Días Bloqueados</th>
+                                    <th class="py-3 px-4 text-center">Descanso 24h</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="stat in stats" :key="stat.doctor_id">
+                                    <tr class="hover:bg-slate-50 transition">
+                                        <td class="py-3 px-4 font-semibold text-slate-900 flex items-center gap-2.5">
+                                            <span class="w-3 h-3 rounded-full shrink-0" :style="`background-color: ${stat.doctor_color};`"></span>
+                                            <span x-text="stat.doctor_name"></span>
+                                        </td>
+                                        <td class="py-3 px-4 text-center font-extrabold text-base"
+                                            :class="stat.total_shifts === stat.target_shifts ? 'text-emerald-600' : 'text-rose-600'"
+                                            x-text="stat.total_shifts">
+                                        </td>
+                                        <td class="py-3 px-4 text-center font-mono font-bold text-slate-700" x-text="stat.target_shifts"></td>
+                                        <td class="py-3 px-4 text-center font-bold text-purple-800" x-text="stat.thursday_shifts"></td>
+                                        <td class="py-3 px-4 text-center font-medium text-slate-700" x-text="stat.weekend_shifts"></td>
+                                        <td class="py-3 px-4 text-center font-medium text-slate-700" x-text="stat.holiday_shifts"></td>
+                                        <td class="py-3 px-4 text-center text-xs text-slate-500" x-text="`${stat.blocked_days_count} d`"></td>
+                                        <td class="py-3 px-4 text-center">
+                                            <span x-show="stat.consecutive_violations === 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                                100% Cumplido
+                                            </span>
+                                            <span x-show="stat.consecutive_violations > 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800" x-text="`${stat.consecutive_violations} faltas`">
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 no-print mt-auto">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+                <span>MedGuard • Sistema Multi-Usuario de Planificación Automatizada de Guardias Médicas</span>
+                <span class="font-mono text-slate-400">FastAPI • Google OR-Tools CP-SAT • Supabase</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal para Actualizar Contraseña tras Recuperación -->
+    <div x-cloak x-show="showPasswordUpdateModal"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">Definir Nueva Contraseña</h3>
+            <p class="text-xs text-slate-600">Ingresa tu nueva contraseña para completar la recuperación de tu cuenta.</p>
+            <input type="password" minlength="6" x-model="authForm.newPassword" placeholder="Nueva contraseña (mín. 6 caracteres)"
+                   class="w-full text-sm bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-blue-500">
+            <div class="flex justify-end gap-2">
+                <button @click="showPasswordUpdateModal = false" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">
+                    Cancelar
+                </button>
+                <button @click="updateRecoveredPassword()" :disabled="authBusy" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+                    Guardar Contraseña
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Error / Diagnóstico de Infactibilidad -->
+    <div x-cloak x-show="showErrorModal"
+         class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center gap-3 text-rose-600">
+                <div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center text-xl font-bold">⚠️</div>
+                <h3 class="text-lg font-bold text-slate-900">Restricciones en Conflicto</h3>
+            </div>
+
+            <p class="text-sm text-slate-700" x-text="errorMessage"></p>
+
+            <template x-if="diagnostics && diagnostics.length > 0">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block">Diagnóstico y Sugerencias:</span>
+                    <ul class="text-xs text-slate-600 space-y-1.5 list-disc pl-4">
+                        <template x-for="(diag, idx) in diagnostics" :key="idx">
+                            <li x-text="diag"></li>
+                        </template>
+                    </ul>
+                </div>
+            </template>
+
+            <div class="flex justify-end gap-2 pt-2">
+                <button @click="showErrorModal = false; autoBalanceDoubles()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+                    Auto-balancear y Reintentar
+                </button>
+                <button @click="showErrorModal = false" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">
+                    Cerrar y Revisar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
