@@ -31,6 +31,7 @@ class ScheduleRequest(BaseModel):
     days_config: List[DayConfig] = Field(..., description="Configuración de cada día del mes")
     restrictions: List[DoctorRestriction] = Field(default_factory=list, description="Días bloqueados por médico")
     strict_quota: bool = Field(default=True, description="Exigir exactamente target_shifts (7) por médico")
+    avoid_three_in_five_days: bool = Field(default=True, description="Evitar asignar 3 o más guardias en un lapso de 5 días corridos al mismo médico")
     prioritize_thursdays: bool = Field(default=True, description="Optimizar distribución equitativa de jueves")
     prioritize_weekends: bool = Field(default=True, description="Optimizar distribución equitativa de fines de semana")
     max_solve_time_seconds: int = Field(default=15, ge=1, le=60)
@@ -62,6 +63,7 @@ class DoctorStats(BaseModel):
     weekend_shifts: int
     holiday_shifts: int
     consecutive_violations: int = 0
+    three_in_five_violations: int = 0
     blocked_days_count: int = 0
 
 class ScheduleResponse(BaseModel):

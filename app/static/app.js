@@ -77,6 +77,8 @@ function schedulerApp() {
 
         // Pestaña activa: 'calendar' | 'personal' | 'days' | 'matrix' | 'stats'
         activeTab: 'calendar',
+        // Vista del calendario en smartphones verticales: 'list' | 'grid'
+        mobileCalendarView: 'list',
 
         // Estado de fecha y país
         year: 2026,
@@ -92,6 +94,7 @@ function schedulerApp() {
 
         // Parámetros de optimización
         strictQuota: true,
+        avoidThreeInFiveDays: true,
         prioritizeThursdays: true,
         prioritizeWeekends: true,
 
@@ -433,6 +436,7 @@ function schedulerApp() {
                 if (plan) {
                     this.countryCode = plan.country_code || this.countryCode;
                     this.strictQuota = plan.strict_quota !== false;
+                    this.avoidThreeInFiveDays = plan.avoid_three_in_five_days !== false;
                     this.prioritizeThursdays = plan.prioritize_thursdays !== false;
                     this.prioritizeWeekends = plan.prioritize_weekends !== false;
                     this.defaultTargetShifts = Number.isFinite(Number(plan.default_target_shifts))
@@ -509,6 +513,7 @@ function schedulerApp() {
                     month: this.month,
                     country_code: this.countryCode,
                     strict_quota: this.strictQuota,
+                    avoid_three_in_five_days: this.avoidThreeInFiveDays,
                     prioritize_thursdays: this.prioritizeThursdays,
                     prioritize_weekends: this.prioritizeWeekends,
                     default_target_shifts: this.defaultTargetShifts,
@@ -675,6 +680,7 @@ function schedulerApp() {
                     this.month = data.month;
                     this.days = data.days_config;
                     this.strictQuota = data.strict_quota;
+                    this.avoidThreeInFiveDays = data.avoid_three_in_five_days !== false;
                     this.prioritizeThursdays = data.prioritize_thursdays;
                     this.prioritizeWeekends = data.prioritize_weekends;
 
@@ -827,6 +833,10 @@ function schedulerApp() {
 
         get calendarGridDays() {
             return this.getCalendarGridDays();
+        },
+
+        getCalendarListDays() {
+            return this.getCalendarGridDays().filter(item => !item.empty);
         },
 
         // ==========================================
@@ -1225,6 +1235,7 @@ function schedulerApp() {
                 days_config: this.days,
                 restrictions: this.restrictions,
                 strict_quota: this.strictQuota,
+                avoid_three_in_five_days: this.avoidThreeInFiveDays,
                 prioritize_thursdays: this.prioritizeThursdays,
                 prioritize_weekends: this.prioritizeWeekends,
                 max_solve_time_seconds: 15
@@ -1272,6 +1283,13 @@ function schedulerApp() {
             this.activeTab = 'calendar';
         },
 
+        async disableThreeInFiveAndRetry() {
+            this.avoidThreeInFiveDays = false;
+            this.showErrorModal = false;
+            this.scheduleMonthlySave();
+            await this.generateSchedule();
+        },
+
         // ==========================================
         // EXPORTACIONES Y UTILIDADES
         // ==========================================
@@ -1293,9 +1311,9 @@ function schedulerApp() {
             });
 
             csv += "\n\nResumen de Estadísticas por Profesional\n";
-            csv += "Médico,Total Guardias,Cuota Meta,Jueves,Fines de Semana,Feriados,Violaciones Descanso\n";
+            csv += "Médico,Total Guardias,Cuota Meta,Jueves,Fines de Semana,Feriados,Violaciones Descanso,Bloques 3-en-5-Días\n";
             this.stats.forEach(s => {
-                csv += `"${s.doctor_name}",${s.total_shifts},${s.target_shifts},${s.thursday_shifts},${s.weekend_shifts},${s.holiday_shifts},${s.consecutive_violations}\n`;
+                csv += `"${s.doctor_name}",${s.total_shifts},${s.target_shifts},${s.thursday_shifts},${s.weekend_shifts},${s.holiday_shifts},${s.consecutive_violations},${s.three_in_five_violations || 0}\n`;
             });
 
             const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
@@ -1324,6 +1342,7 @@ function schedulerApp() {
                 days: this.days,
                 restrictions: this.restrictions,
                 strictQuota: this.strictQuota,
+                avoidThreeInFiveDays: this.avoidThreeInFiveDays,
                 schedule: this.schedule,
                 stats: this.stats,
                 summary: this.summary

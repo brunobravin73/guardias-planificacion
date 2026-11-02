@@ -51,6 +51,7 @@ def test_demo_data_endpoint():
     assert len(data["doctors"]) == 6
     assert "days_config" in data
     assert "restrictions" in data
+    assert data.get("avoid_three_in_five_days") is True
     print("\n[OK] API Demo Data endpoint passed.")
 
 def test_solve_endpoint_with_demo():
@@ -62,17 +63,22 @@ def test_solve_endpoint_with_demo():
     assert solve_res.status_code == 200
     result = solve_res.json()
     assert result["success"] is True
+    assert result["summary"]["avoid_three_in_five_enabled"] is True
+    assert result["summary"]["zero_three_in_five_clusters"] is True
     assert len(result["schedule"]) > 0
     assert len(result["stats"]) == 6
     for stat in result["stats"]:
         assert stat["total_shifts"] == 7
         assert stat["consecutive_violations"] == 0
-    print("\n[OK] API Solve endpoint passed with exact 7 shifts & zero consecutive days.")
+        assert stat["three_in_five_violations"] == 0
+    print("\n[OK] API Solve endpoint passed with exact 7 shifts, zero consecutive days & max 2 shifts in 5 days.")
 
 def test_static_index():
     response = client.get("/")
     assert response.status_code == 200
     assert "MedGuard" in response.text
+    assert "avoidThreeInFiveDays" in response.text
+    assert "mobile-agenda-view" in response.text
     print("\n[OK] Static UI index.html served correctly.")
 
 if __name__ == "__main__":

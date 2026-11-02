@@ -1,9 +1,10 @@
-/* Estilos personalizados para el Planificador de Guardias Médicas */
+/* Estilos personalizados para MedGuard • Planificador de Guardias Médicas */
 
 [x-cloak] {
     display: none !important;
 }
 
+/* Impresión optimizada para entrar en 1 sola hoja A4 horizontal al 100% de escala */
 @media print {
     * {
         -webkit-print-color-adjust: exact !important;
@@ -12,14 +13,15 @@
 
     @page {
         size: A4 landscape;
-        margin: 6mm 10mm;
+        margin: 5mm 7mm;
     }
 
-    /* Ocultar elementos de navegación y control al imprimir */
+    /* Ocultar elementos de navegación, banners y vista móvil al imprimir */
     header,
     nav,
     .no-print,
     .auth-screen,
+    .mobile-agenda-view,
     button,
     .controls-panel,
     .tabs-navigation,
@@ -27,22 +29,38 @@
         display: none !important;
     }
 
-    body {
+    html,
+    body,
+    .app-shell {
         background-color: white !important;
         color: black !important;
-        font-size: 10pt !important;
+        font-size: 9pt !important;
+        min-height: 0 !important;
+        height: auto !important;
         margin: 0 !important;
         padding: 0 !important;
+        display: block !important;
+        overflow: visible !important;
     }
 
     main {
         padding: 0 !important;
+        margin: 0 !important;
         max-width: 100% !important;
         width: 100% !important;
     }
 
-    /* Asegurar que la sección del calendario siempre se muestre al imprimir */
+    /* Mostrar siempre la grilla de 7 columnas del calendario al imprimir */
     .calendar-tab-content {
+        display: block !important;
+        margin: 0 !important;
+    }
+
+    .calendar-tab-content > * + * {
+        margin-top: 0 !important;
+    }
+
+    .desktop-grid-view {
         display: block !important;
     }
 
@@ -54,8 +72,27 @@
         display: none !important;
     }
 
+    /* Encabezado compacto de una sola franja para ahorrar altura vertical */
     .print-only {
-        display: block !important;
+        display: flex !important;
+        align-items: baseline !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        margin: 0 0 4px 0 !important;
+        padding: 0 0 3px 0 !important;
+        border-bottom: 1.5px solid #334155 !important;
+    }
+
+    .print-only h1 {
+        font-size: 11.5pt !important;
+        line-height: 1.15 !important;
+        margin: 0 !important;
+    }
+
+    .print-only p {
+        font-size: 8pt !important;
+        line-height: 1.15 !important;
+        margin: 0 !important;
     }
 
     .print-container {
@@ -63,41 +100,88 @@
         max-width: 100% !important;
         box-shadow: none !important;
         border: 1px solid #94a3b8 !important;
+        border-radius: 6px !important;
         padding: 0 !important;
         overflow: visible !important;
         background-color: white !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
-    /* Forzar que el calendario se vea nítido en hoja A4 landscape */
+    .print-weekdays {
+        padding: 3px 0 !important;
+        font-size: 7.5pt !important;
+        line-height: 1.1 !important;
+    }
+
+    .calendar-scroll-wrapper {
+        overflow: visible !important;
+    }
+
+    /* Forzar grilla compacta sin inflado de filas para meses de 5 o 6 semanas */
     .calendar-grid {
         display: grid !important;
-        grid-template-columns: repeat(7, 1fr) !important;
+        grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+        grid-auto-rows: auto !important;
+        min-width: 0 !important;
+        width: 100% !important;
         gap: 1px !important;
         background-color: #cbd5e1 !important;
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 
     .calendar-cell {
-        min-height: 80px !important;
+        min-height: 66px !important;
+        padding: 3px 5px !important;
         border: 1px solid #cbd5e1 !important;
         page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .cell-header {
+        margin-bottom: 2px !important;
+        align-items: center !important;
+    }
+
+    .cell-day-number {
+        font-size: 9.5pt !important;
+        line-height: 1 !important;
+    }
+
+    .cell-badges {
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
+        justify-content: flex-end !important;
+        gap: 2px !important;
+    }
+
+    .cell-doctors {
+        margin: 0 !important;
+    }
+
+    .cell-doctors > * + * {
+        margin-top: 2px !important;
     }
 
     .badge-doctor {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         border: 1px solid rgba(0, 0, 0, 0.25) !important;
-        font-size: 8pt !important;
-        padding: 2px 4px !important;
-        margin-bottom: 2px !important;
+        font-size: 7.8pt !important;
+        line-height: 1.15 !important;
+        padding: 1.5px 4px !important;
+        margin: 0 !important;
         color: white !important;
-        border-radius: 4px !important;
+        border-radius: 3px !important;
         text-shadow: 0 0 1px rgba(0, 0, 0, 0.6) !important;
     }
 
     .print-badge-double {
         border: 1px solid #3b82f6 !important;
-        font-size: 7.5pt !important;
+        font-size: 6.8pt !important;
+        line-height: 1.15 !important;
+        padding: 0.5px 3px !important;
         background-color: #eff6ff !important;
         color: #1d4ed8 !important;
     }
@@ -107,7 +191,40 @@
     display: none;
 }
 
-/* Scrollbar estilizado para la matriz de restricciones */
+/* Optimización específica para smartphones en posición horizontal (poca altura) */
+@media screen and (max-height: 560px) {
+    .app-header {
+        position: static !important;
+    }
+
+    .auth-screen {
+        min-height: auto !important;
+        align-items: flex-start !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+    }
+
+    .auth-hero-details {
+        display: none !important;
+    }
+
+    .auth-hero-panel {
+        padding: 0.875rem 1.25rem !important;
+    }
+
+    .hero-welcome-banner,
+    .quota-balance-banner {
+        padding: 0.625rem 0.875rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    main {
+        padding-top: 0.75rem !important;
+        padding-bottom: 1rem !important;
+    }
+}
+
+/* Scrollbar estilizado para grilla y matriz de restricciones */
 .custom-scrollbar::-webkit-scrollbar {
     height: 8px;
     width: 8px;
@@ -144,5 +261,5 @@
 }
 
 .calendar-cell {
-    min-height: 110px;
+    min-height: 108px;
 }

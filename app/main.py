@@ -148,6 +148,7 @@ def get_demo_data(country_code: str = "AR"):
         "days_config": days,
         "restrictions": sample_restrictions,
         "strict_quota": True,
+        "avoid_three_in_five_days": True,
         "prioritize_thursdays": True,
         "prioritize_weekends": True
     }

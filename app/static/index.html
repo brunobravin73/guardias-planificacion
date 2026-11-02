@@ -63,25 +63,25 @@
     <!-- ========================================== -->
     <!-- PANTALLA DE AUTENTICACIÓN MULTI-USUARIO    -->
     <!-- ========================================== -->
-    <div x-cloak x-show="!isBootstrapping && supabaseEnabled && !user" class="auth-screen min-h-screen flex items-center justify-center p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/50 no-print">
-        <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
+    <div x-cloak x-show="!isBootstrapping && supabaseEnabled && !user" class="auth-screen min-h-screen flex items-center justify-center p-3 sm:p-6 bg-gradient-to-br from-slate-50 via-blue-50/40 to-indigo-50/50 no-print">
+        <div class="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-200 overflow-hidden">
 
-            <!-- Columna Informativa -->
-            <div class="lg:col-span-5 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white p-8 flex flex-col justify-between">
-                <div class="space-y-6">
+            <!-- Columna Informativa (Compacta en móviles y horizontal) -->
+            <div class="auth-hero-panel lg:col-span-5 bg-gradient-to-br from-blue-700 via-blue-600 to-indigo-700 text-white p-5 sm:p-6 lg:p-8 flex flex-col justify-between">
+                <div class="space-y-4 lg:space-y-6">
                     <div class="flex items-center gap-3">
-                        <div class="w-11 h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-white border border-white/20">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="w-10 h-10 lg:w-11 lg:h-11 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center text-white border border-white/20 shrink-0">
+                            <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
                             </svg>
                         </div>
                         <div>
-                            <h1 class="text-xl font-extrabold tracking-tight">MedGuard Cloud</h1>
+                            <h1 class="text-lg lg:text-xl font-extrabold tracking-tight">MedGuard Cloud</h1>
                             <p class="text-xs text-blue-100">Planificación Inteligente de Guardias</p>
                         </div>
                     </div>
 
-                    <div class="space-y-4 pt-2">
+                    <div class="hidden lg:block auth-hero-details space-y-4 pt-2">
                         <h2 class="text-lg font-bold leading-snug">
                             Cada servicio médico con su propio plantel y calendarios en la nube.
                         </h2>
@@ -92,23 +92,23 @@
                             </li>
                             <li class="flex items-start gap-2.5">
                                 <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">✓</span>
-                                <span><strong>Historial Mensual:</strong> Consulta, edita e imprime en A4 apaisado los roles de cualquier mes y año.</span>
+                                <span><strong>Historial Mensual:</strong> Consulta, edita e imprime en una sola hoja A4 apaisada los roles de cualquier mes.</span>
                             </li>
                             <li class="flex items-start gap-2.5">
                                 <span class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center text-[11px] font-bold shrink-0 mt-0.5">✓</span>
-                                <span><strong>Optimización Exacta CP-SAT:</strong> Descanso post-guardia obligatorio de 24h y reparto equitativo de jueves y fines de semana.</span>
+                                <span><strong>Optimización Exacta CP-SAT:</strong> Descanso obligatorio de 24h, tope opcional de 2 guardias cada 5 días y reparto equitativo de jueves.</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
-                <div class="pt-8 text-[11px] text-blue-200 border-t border-white/15 mt-8">
+                <div class="hidden lg:block auth-hero-details pt-8 text-[11px] text-blue-200 border-t border-white/15 mt-8">
                     Datos aislados y protegidos con seguridad a nivel de fila (Row-Level Security).
                 </div>
             </div>
 
             <!-- Columna de Formulario (Login / Registro / Recuperación) -->
-            <div class="lg:col-span-7 p-8 sm:p-10 flex flex-col justify-center">
+            <div class="lg:col-span-7 p-5 sm:p-8 lg:p-10 flex flex-col justify-center">
                 <!-- Selector de pestaña Iniciar Sesión / Crear Cuenta -->
                 <div class="flex rounded-xl bg-slate-100 p-1 mb-6" x-show="authMode !== 'reset'">
                     <button type="button"
@@ -206,47 +206,59 @@
     <!-- ========================================== -->
     <!-- APLICACIÓN PRINCIPAL (USUARIO AUTENTICADO) -->
     <!-- ========================================== -->
-    <div x-cloak x-show="!isBootstrapping && (!supabaseEnabled || user)" class="min-h-screen flex flex-col">
+    <div x-cloak x-show="!isBootstrapping && (!supabaseEnabled || user)" class="app-shell min-h-screen flex flex-col">
 
-        <!-- Header Principal -->
-        <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm no-print">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
-                <!-- Logo, Título y Estado de Guardado en Nube -->
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
-                        </svg>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <h1 class="text-lg font-bold text-slate-900 tracking-tight">MedGuard</h1>
-                            <span class="text-[11px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold uppercase tracking-wider">CP-SAT</span>
-
-                            <!-- Indicador de Persistencia en Supabase -->
-                            <template x-if="supabaseEnabled && user">
-                                <div>
-                                    <span x-show="syncStatus === 'saving'" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
-                                        Guardando...
-                                    </span>
-                                    <span x-show="syncStatus === 'saved'" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium" :title="lastSyncedAt ? `Última sincronización: ${lastSyncedAt}` : ''">
-                                        <span>☁️</span> Guardado
-                                    </span>
-                                    <button x-show="syncStatus === 'error'" @click="flushPendingSaves()" class="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-semibold hover:bg-rose-100 transition">
-                                        ⚠️ Error al guardar • Reintentar
-                                    </button>
-                                </div>
-                            </template>
+        <!-- Header Principal (Sticky solo en escritorio amplio para no bloquear pantallas móviles ni horizontales) -->
+        <header class="app-header bg-white border-b border-slate-200 lg:sticky lg:top-0 z-30 shadow-sm no-print">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex flex-col md:flex-row md:items-center justify-between gap-2.5">
+                <!-- Fila superior en móvil: Logo, Estado y Botón Salir -->
+                <div class="flex items-center justify-between gap-2 min-w-0">
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20 shrink-0">
+                            <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+                            </svg>
                         </div>
-                        <p class="text-xs text-slate-500 font-normal">Planificación Equitativa de Guardias Médicas • No Consecutivas</p>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">MedGuard</h1>
+                                <span class="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold uppercase tracking-wider">CP-SAT</span>
+
+                                <!-- Indicador de Persistencia en Supabase -->
+                                <template x-if="supabaseEnabled && user">
+                                    <div>
+                                        <span x-show="syncStatus === 'saving'" class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-medium">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                                            Guardando...
+                                        </span>
+                                        <span x-show="syncStatus === 'saved'" class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-medium" :title="lastSyncedAt ? `Última sincronización: ${lastSyncedAt}` : ''">
+                                            <span>☁️</span> Guardado
+                                        </span>
+                                        <button x-show="syncStatus === 'error'" @click="flushPendingSaves()" class="inline-flex items-center gap-1 text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 font-semibold hover:bg-rose-100 transition">
+                                            ⚠️ Reintentar
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
+                            <p class="hidden md:block text-xs text-slate-500 font-normal">Planificación Equitativa de Guardias Médicas • No Consecutivas</p>
+                        </div>
                     </div>
+
+                    <!-- Botón Salir visible arriba a la derecha en móviles -->
+                    <template x-if="supabaseEnabled && user">
+                        <button @click="signOut()" title="Cerrar sesión" class="md:hidden text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                            </svg>
+                            <span>Salir</span>
+                        </button>
+                    </template>
                 </div>
 
-                <!-- Controles Globales (Mes, Año, País, Botón Resolver, Cuenta) -->
-                <div class="flex flex-wrap items-center gap-2">
+                <!-- Controles Globales (Mes, Año, País, Demo, Generar, Cuenta Desktop) -->
+                <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full md:w-auto">
                     <!-- Selector de Mes -->
-                    <select x-model.number="month" @change="onPeriodChange()" class="text-sm font-medium bg-slate-100 border-none rounded-lg px-3 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer transition">
+                    <select x-model.number="month" @change="onPeriodChange()" class="flex-1 sm:flex-none min-w-[108px] text-xs sm:text-sm font-medium bg-slate-100 border-none rounded-lg px-2.5 sm:px-3 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer transition">
                         <option value="1">Enero</option>
                         <option value="2">Febrero</option>
                         <option value="3">Marzo</option>
@@ -262,25 +274,25 @@
                     </select>
 
                     <!-- Selector de Año -->
-                    <input type="number" x-model.number="year" @change="onPeriodChange()" min="2020" max="2035" class="w-20 text-sm font-medium bg-slate-100 border-none rounded-lg px-2.5 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white text-center cursor-pointer transition">
+                    <input type="number" x-model.number="year" @change="onPeriodChange()" min="2020" max="2035" class="w-16 sm:w-20 text-xs sm:text-sm font-medium bg-slate-100 border-none rounded-lg px-2 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white text-center cursor-pointer transition">
 
                     <!-- Selector de País de Feriados -->
-                    <select x-model="countryCode" @change="onCountryChange()" class="text-sm font-medium bg-slate-100 border-none rounded-lg px-2.5 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer transition">
+                    <select x-model="countryCode" @change="onCountryChange()" class="flex-1 sm:flex-none min-w-[96px] max-w-[150px] sm:max-w-none text-xs sm:text-sm font-medium bg-slate-100 border-none rounded-lg px-2 sm:px-2.5 py-2 text-slate-700 focus:ring-2 focus:ring-blue-500 focus:bg-white cursor-pointer transition truncate">
                         <template x-for="c in supportedCountries" :key="c.code">
                             <option :value="c.code" x-text="`${c.code} - ${c.name}`"></option>
                         </template>
                     </select>
 
                     <!-- Botón Cargar Ejemplo -->
-                    <button @click="loadDemoData(true)" title="Carga 6 médicos de ejemplo, días dobles balanceados y bloqueos de prueba" class="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-lg transition flex items-center gap-1.5">
-                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                        Demo
+                    <button @click="loadDemoData(true)" title="Carga 6 médicos de ejemplo, días dobles balanceados y bloqueos de prueba" class="text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 px-2.5 sm:px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 shrink-0">
+                        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        <span>Demo</span>
                     </button>
 
                     <!-- Botón Principal: Generar Calendario -->
                     <button @click="generateSchedule()"
                             :disabled="isSolving"
-                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-sm px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md transition flex items-center gap-2">
+                            class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-semibold text-xs sm:text-sm px-3.5 sm:px-4 py-2 rounded-lg shadow-sm shadow-blue-500/20 hover:shadow-md transition flex items-center justify-center gap-1.5">
                         <template x-if="isSolving">
                             <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -293,9 +305,9 @@
                         <span x-text="isSolving ? 'Calculando...' : 'Generar Calendario'"></span>
                     </button>
 
-                    <!-- Cuenta de Usuario y Cerrar Sesión -->
+                    <!-- Cuenta de Usuario y Cerrar Sesión (Desktop/Tablet) -->
                     <template x-if="supabaseEnabled && user">
-                        <div class="flex items-center gap-1.5 pl-2 border-l border-slate-200">
+                        <div class="hidden md:flex items-center gap-1.5 pl-2 border-l border-slate-200">
                             <span class="hidden xl:inline-block text-xs font-medium text-slate-600 max-w-[160px] truncate" :title="user.email" x-text="user.email"></span>
                             <button @click="signOut()" title="Cerrar sesión" class="text-xs font-semibold text-slate-600 hover:text-rose-600 bg-slate-100 hover:bg-rose-50 px-2.5 py-2 rounded-lg transition flex items-center gap-1">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -309,41 +321,41 @@
             </div>
 
             <!-- Barra de Pestañas / Navegación -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between border-t border-slate-100 overflow-x-auto gap-4">
-                <nav class="flex space-x-1 sm:space-x-4">
+            <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center justify-between border-t border-slate-100 overflow-x-auto custom-scrollbar gap-3">
+                <nav class="flex space-x-1 sm:space-x-3">
                     <button @click="activeTab = 'calendar'"
                             :class="activeTab === 'calendar' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
-                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
-                        <span>📅</span> Calendario Mensual
+                            class="py-2.5 sm:py-3 px-2.5 sm:px-3 border-b-2 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap transition">
+                        <span>📅</span> <span>Calendario</span>
                         <template x-if="schedule.length > 0">
-                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full font-bold">Listo</span>
+                            <span class="bg-blue-100 text-blue-800 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold">Listo</span>
                         </template>
                     </button>
 
                     <button @click="activeTab = 'personal'"
                             :class="activeTab === 'personal' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
-                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
-                        <span>👥</span> Personal Médico
-                        <span class="bg-slate-100 text-slate-700 text-xs px-2 py-0.5 rounded-full font-bold" x-text="`${activeDoctorsCount}`"></span>
+                            class="py-2.5 sm:py-3 px-2.5 sm:px-3 border-b-2 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap transition">
+                        <span>👥</span> <span>Personal</span>
+                        <span class="bg-slate-100 text-slate-700 text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold" x-text="`${activeDoctorsCount}`"></span>
                     </button>
 
                     <button @click="activeTab = 'days'"
                             :class="activeTab === 'days' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
-                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
-                        <span>⚙️</span> Guardias Dobles y Feriados
-                        <span :class="isBalanceOk ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" class="text-xs px-2 py-0.5 rounded-full font-bold" x-text="isBalanceOk ? 'Equilibrado' : 'Ajustar'"></span>
+                            class="py-2.5 sm:py-3 px-2.5 sm:px-3 border-b-2 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap transition">
+                        <span>⚙️</span> <span>Dobles y Feriados</span>
+                        <span :class="isBalanceOk ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" class="text-[10px] sm:text-xs px-1.5 py-0.5 rounded-full font-bold" x-text="isBalanceOk ? 'OK' : 'Ajustar'"></span>
                     </button>
 
                     <button @click="activeTab = 'matrix'"
                             :class="activeTab === 'matrix' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
-                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
-                        <span>🚫</span> Matriz de Indisponibilidad
+                            class="py-2.5 sm:py-3 px-2.5 sm:px-3 border-b-2 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap transition">
+                        <span>🚫</span> <span>Indisponibilidad</span>
                     </button>
 
                     <button @click="activeTab = 'stats'"
                             :class="activeTab === 'stats' ? 'border-blue-600 text-blue-600 font-semibold' : 'border-transparent text-slate-500 hover:text-slate-800'"
-                            class="py-3 px-3 border-b-2 text-sm flex items-center gap-2 whitespace-nowrap transition">
-                        <span>📊</span> Auditoría y Estadísticas
+                            class="py-2.5 sm:py-3 px-2.5 sm:px-3 border-b-2 text-xs sm:text-sm flex items-center gap-1.5 whitespace-nowrap transition">
+                        <span>📊</span> <span>Estadísticas</span>
                     </button>
                 </nav>
 
@@ -365,216 +377,304 @@
         </header>
 
         <!-- Contenido Principal -->
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full">
+        <main class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 flex-1 w-full">
 
             <!-- Tarjeta de Bienvenida para Cuenta Nueva (0 médicos cargados) -->
-            <div x-show="doctors.length === 0 && !isLoadingWorkspace" class="mb-6 p-6 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md no-print flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="space-y-1">
-                    <h2 class="text-base font-bold">¡Tu espacio de planificación está listo!</h2>
+            <div x-show="doctors.length === 0 && !isLoadingWorkspace" class="hero-welcome-banner mb-4 sm:mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md no-print flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+                <div class="space-y-0.5">
+                    <h2 class="text-sm sm:text-base font-bold">¡Tu espacio de planificación está listo!</h2>
                     <p class="text-xs text-blue-100">
-                        Comienza agregando los profesionales de tu servicio médico (se guardarán automáticamente en tu cuenta) o prueba con un plantel de ejemplo editable.
+                        Agrega los profesionales de tu servicio médico o prueba con un plantel de ejemplo editable.
                     </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-2.5 shrink-0">
-                    <button @click="activeTab = 'personal'" class="bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs px-4 py-2.5 rounded-xl shadow-sm transition">
-                        ➕ Cargar mi Plantel Médico
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
+                    <button @click="activeTab = 'personal'" class="flex-1 sm:flex-none text-center bg-white text-blue-700 hover:bg-blue-50 font-bold text-xs px-3.5 py-2 rounded-xl shadow-sm transition">
+                        ➕ Cargar mi Plantel
                     </button>
-                    <button @click="loadDemoData(false)" class="bg-blue-500/40 hover:bg-blue-500/60 text-white border border-white/30 font-semibold text-xs px-4 py-2.5 rounded-xl transition">
-                        ✨ Probar con 6 Médicos de Ejemplo
+                    <button @click="loadDemoData(false)" class="flex-1 sm:flex-none text-center bg-blue-500/40 hover:bg-blue-500/60 text-white border border-white/30 font-semibold text-xs px-3.5 py-2 rounded-xl transition">
+                        ✨ Ejemplo (6 Médicos)
                     </button>
                 </div>
             </div>
 
-            <!-- Banner de Balance de Cupos -->
+            <!-- Banner de Balance de Cupos (Compacto en móviles y horizontal) -->
             <div x-show="doctors.length > 0"
-                 class="mb-6 p-4 rounded-xl border no-print flex flex-col md:flex-row items-center justify-between gap-4 transition"
+                 class="quota-balance-banner mb-4 sm:mb-6 p-3 sm:p-4 rounded-xl border no-print flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5 sm:gap-4 transition"
                  :class="isBalanceOk ? 'bg-emerald-50/70 border-emerald-200' : 'bg-amber-50/70 border-amber-200'">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-base shrink-0"
                          :class="isBalanceOk ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">
                         <span x-text="isBalanceOk ? '✅' : '⚖️'"></span>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-900">
-                            Balance de Guardias del Mes:
-                            <span class="text-slate-700" x-text="`${activeDoctorsCount} médicos activos • ${totalCapacity} guardias programadas (${(totalCapacity / (activeDoctorsCount || 1)).toFixed(1)} prom/médico)`"></span>
+                    <div class="min-w-0">
+                        <h3 class="text-xs sm:text-sm font-bold text-slate-900">
+                            Balance:
+                            <span class="text-slate-700" x-text="`${activeDoctorsCount} médicos • ${totalSlotsRequired}/${totalCapacity} cupos (${(totalCapacity / (activeDoctorsCount || 1)).toFixed(1)} prom)`"></span>
                         </h3>
-                        <p class="text-xs text-slate-600" x-show="isBalanceOk">
-                            La suma de turnos del mes coincide exactamente con la cuota total requerida. La asignación matemática es factible.
+                        <p class="hidden sm:block text-xs text-slate-600" x-show="isBalanceOk">
+                            La suma de turnos del mes coincide exactamente con la cuota total requerida.
                         </p>
-                        <p class="text-xs text-amber-800 font-medium" x-show="!isBalanceOk" x-text="`Diferencia: ${quotaBalanceDiff > 0 ? 'Sobran ' + quotaBalanceDiff : 'Faltan ' + Math.abs(quotaBalanceDiff)} cupos de guardia. Se requieren ${totalCapacity} turnos en total según las cuotas individuales.`"></p>
+                        <p class="text-xs text-amber-800 font-medium" x-show="!isBalanceOk" x-text="`${quotaBalanceDiff > 0 ? 'Sobran ' + quotaBalanceDiff : 'Faltan ' + Math.abs(quotaBalanceDiff)} cupos para cubrir ${totalCapacity} turnos.`"></p>
                     </div>
                 </div>
 
                 <!-- Botones de Acción Rápida para el Balance -->
-                <div class="flex items-center gap-2">
-                    <button @click="autoBalanceDoubles()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium text-xs px-3.5 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
+                <div class="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                    <button @click="autoBalanceDoubles()" class="w-full sm:w-auto justify-center bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-medium text-xs px-3 py-1.5 sm:py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
                         <span>✨</span> Auto-balancear Días Dobles
                     </button>
-                    <div class="text-xs text-slate-500 hidden sm:block">
-                        Total Cupos: <strong class="text-slate-800" x-text="totalSlotsRequired"></strong> / <span x-text="totalCapacity"></span>
-                    </div>
                 </div>
             </div>
 
             <!-- ========================================== -->
             <!-- PESTAÑA 1: CALENDARIO MENSUAL RESULTANTE   -->
             <!-- ========================================== -->
-            <div x-show="activeTab === 'calendar'" class="space-y-6 calendar-tab-content">
+            <div x-show="activeTab === 'calendar'" class="space-y-4 sm:space-y-6 calendar-tab-content">
 
-                <!-- Barra de Herramientas del Calendario -->
-                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-xl border border-slate-200 shadow-sm no-print">
-                    <div class="flex items-center gap-3 flex-wrap">
-                        <h2 class="text-lg font-bold text-slate-900 tracking-tight" x-text="`${monthName} ${year}`"></h2>
-                        <span class="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 font-medium" x-text="`${summary ? summary.total_days : days.length} días • ${totalSlotsRequired} turnos totales`"></span>
+                <!-- Barra de Herramientas del Calendario (Responsiva sin superposiciones) -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-sm no-print">
+                    <div class="flex items-center justify-between sm:justify-start gap-2.5 flex-wrap">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight" x-text="`${monthName} ${year}`"></h2>
+                            <span class="text-[11px] sm:text-xs px-2.5 py-0.5 sm:py-1 rounded-full bg-slate-100 text-slate-600 font-medium" x-text="`${summary ? summary.total_days : days.length}d • ${totalSlotsRequired} turnos`"></span>
+                        </div>
+
+                        <!-- Regla Opcional Activable/Desactivable: No asignar 3 guardias en 5 días -->
+                        <label class="inline-flex items-center cursor-pointer bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-1.5 transition"
+                               title="Si está activa, ningún médico podrá recibir 3 guardias dentro de un período de 5 días corridos">
+                            <input type="checkbox" x-model="avoidThreeInFiveDays" @change="scheduleMonthlySave()" class="sr-only peer">
+                            <div class="relative w-8 h-4 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600 shrink-0"></div>
+                            <span class="ms-2 text-[11px] sm:text-xs font-semibold"
+                                  :class="avoidThreeInFiveDays ? 'text-indigo-700' : 'text-slate-500'"
+                                  x-text="avoidThreeInFiveDays ? '🛡️ Máx. 2 guardias / 5 días' : '⚪ Permitir 3 en 5 días'">
+                            </span>
+                        </label>
+
                         <template x-if="lastSolvedAt">
-                            <span class="text-xs text-slate-400">Calculado: <span x-text="lastSolvedAt"></span></span>
+                            <span class="hidden xl:inline text-xs text-slate-400">Calculado: <span x-text="lastSolvedAt"></span></span>
                         </template>
                     </div>
 
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <button @click="exportCSV()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                            Descargar CSV
-                        </button>
-                        <button @click="printSchedule()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                            Imprimir / PDF
-                        </button>
-                        <button @click="exportJSON()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-3 py-2 rounded-lg shadow-sm transition flex items-center gap-1.5">
-                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-                            Exportar JSON
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Encabezado para impresión únicamente -->
-                <div class="print-only mb-4 text-center">
-                    <h1 class="text-2xl font-bold uppercase tracking-wider text-slate-900">Planificación Mensual de Guardias Médicas</h1>
-                    <p class="text-base text-slate-700 font-semibold" x-text="`Rol de Guardias: ${monthName} ${year}`"></p>
-                    <p class="text-xs text-slate-500 mt-0.5">Horario de guardia: 08:00 AM a 08:00 AM del día siguiente • Descanso obligatorio post-guardia de 24 horas</p>
-                </div>
-
-                <!-- Grilla del Calendario (7 columnas: Lunes a Domingo) -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-container">
-                    <!-- Días de la semana header -->
-                    <div class="grid grid-cols-7 bg-slate-50 border-b border-slate-200 text-center py-2.5 text-xs font-bold text-slate-600 tracking-wider uppercase">
-                        <div>Lunes</div>
-                        <div>Martes</div>
-                        <div>Miércoles</div>
-                        <div class="text-purple-700 flex items-center justify-center gap-1">
-                            <span>Jueves</span>
-                            <span class="text-[10px] bg-purple-100 text-purple-800 px-1 rounded no-print">⭐ Clave</span>
+                    <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2">
+                        <!-- Selector Lista vs Grilla exclusivo para Smartphones Verticales -->
+                        <div class="sm:hidden inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200">
+                            <button type="button"
+                                    @click="mobileCalendarView = 'list'"
+                                    :class="mobileCalendarView === 'list' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-slate-600 font-medium'"
+                                    class="text-[11px] px-2.5 py-1 rounded-md transition">
+                                📱 Lista
+                            </button>
+                            <button type="button"
+                                    @click="mobileCalendarView = 'grid'"
+                                    :class="mobileCalendarView === 'grid' ? 'bg-white text-blue-700 shadow-sm font-bold' : 'text-slate-600 font-medium'"
+                                    class="text-[11px] px-2.5 py-1 rounded-md transition">
+                                📅 Grilla
+                            </button>
                         </div>
-                        <div>Viernes</div>
-                        <div class="text-blue-700">Sábado</div>
-                        <div class="text-blue-700">Domingo</div>
+
+                        <!-- Botones de Exportación e Impresión -->
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <button @click="exportCSV()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg shadow-sm transition flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                <span>CSV</span>
+                            </button>
+                            <button @click="printSchedule()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg shadow-sm transition flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                <span>Imprimir / PDF</span>
+                            </button>
+                            <button @click="exportJSON()" class="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg shadow-sm transition flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                <span>JSON</span>
+                            </button>
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Celdas de días con UN SOLO elemento raíz por cada iteración del template -->
-                    <div class="grid grid-cols-7 auto-rows-fr gap-[1px] bg-slate-200 calendar-grid">
-                        <template x-for="item in getCalendarGridDays()" :key="item.empty ? item.id : item.day">
-                            <div class="calendar-cell min-h-[110px] p-2.5 flex flex-col justify-between transition relative border border-slate-100"
+                <!-- Encabezado compacto en 1 franja para Impresión A4 Horizontal (1 sola hoja) -->
+                <div class="print-only">
+                    <h1 class="font-bold uppercase tracking-wide text-slate-900" x-text="`Planificación Mensual de Guardias Médicas — ${monthName} ${year}`"></h1>
+                    <p class="text-slate-600 font-medium">Guardia: 08:00 a 08:00 hs • Descanso post-guardia obligatorio 24h</p>
+                </div>
+
+                <!-- VISTA AGENDA / LISTA DIARIA PARA SMARTPHONES VERTICALES -->
+                <div x-show="mobileCalendarView === 'list'" class="mobile-agenda-view sm:hidden space-y-2 no-print">
+                    <template x-for="item in getCalendarListDays()" :key="item.day">
+                        <div class="p-3 rounded-xl border flex items-start gap-3 shadow-sm"
+                             :class="{
+                                 'bg-purple-50/50 border-purple-200': item.is_thursday,
+                                 'bg-blue-50/40 border-blue-200': !item.is_thursday && item.is_weekend,
+                                 'bg-amber-50/50 border-amber-200': item.is_holiday,
+                                 'bg-white border-slate-200': !item.is_thursday && !item.is_weekend && !item.is_holiday
+                             }">
+                            <!-- Columna Día -->
+                            <div class="w-14 shrink-0 text-center rounded-lg py-1.5 px-1 border"
                                  :class="{
-                                     'bg-slate-50/50': item.empty,
-                                     'bg-purple-50/40': !item.empty && item.is_thursday,
-                                     'bg-blue-50/30': !item.empty && item.is_weekend,
-                                     'bg-amber-50/40': !item.empty && item.is_holiday,
-                                     'bg-white': !item.empty && !item.is_thursday && !item.is_weekend && !item.is_holiday
+                                     'bg-purple-100/80 border-purple-200 text-purple-800': item.is_thursday,
+                                     'bg-blue-100/70 border-blue-200 text-blue-800': !item.is_thursday && item.is_weekend,
+                                     'bg-amber-100/80 border-amber-200 text-amber-900': item.is_holiday,
+                                     'bg-slate-50 border-slate-200 text-slate-800': !item.is_thursday && !item.is_weekend && !item.is_holiday
                                  }">
+                                <div class="text-lg font-extrabold leading-none" x-text="item.day"></div>
+                                <div class="text-[10px] font-bold uppercase mt-0.5" x-text="item.weekday_name.substring(0, 3)"></div>
+                            </div>
 
-                                <!-- Contenido del día -->
-                                <div x-show="!item.empty" class="w-full h-full flex flex-col justify-between">
-                                    <!-- Cabecera de celda: Número de día y badges -->
-                                    <div class="flex items-start justify-between gap-1 mb-1.5">
-                                        <span class="text-base font-extrabold"
-                                              :class="{
-                                                  'text-purple-700': item.is_thursday,
-                                                  'text-blue-700': item.is_weekend,
-                                                  'text-amber-800': item.is_holiday,
-                                                  'text-slate-800': !item.is_thursday && !item.is_weekend && !item.is_holiday
-                                              }"
-                                              x-text="item.day">
-                                        </span>
+                            <!-- Columna Médicos Asignados y Etiquetas -->
+                            <div class="flex-1 min-w-0 space-y-1.5">
+                                <div class="flex items-center flex-wrap gap-1" x-show="item.is_thursday || item.is_holiday || item.required_shifts !== 1">
+                                    <span x-show="item.is_thursday" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">⭐ Jueves</span>
+                                    <span x-show="item.required_shifts === 0" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">Libre (0)</span>
+                                    <span x-show="item.required_shifts === 2" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200">Doble (2)</span>
+                                    <span x-show="item.required_shifts >= 3" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">Triple (3)</span>
+                                    <span x-show="item.is_holiday" class="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200 truncate max-w-full" x-text="item.holiday_name || 'Feriado'"></span>
+                                </div>
 
-                                        <div class="flex flex-col items-end gap-0.5">
-                                            <span x-show="item.required_shifts === 0" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
-                                                Libre (0)
-                                            </span>
-                                            <span x-show="item.required_shifts === 2" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200 print-badge-double">
-                                                Doble (2)
-                                            </span>
-                                            <span x-show="item.required_shifts >= 3" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200">
-                                                Triple (3)
-                                            </span>
-
-                                            <span x-show="item.is_holiday" class="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200 max-w-[120px] truncate"
-                                                  :title="item.holiday_name"
-                                                  x-text="item.holiday_name || 'Feriado'">
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                    <!-- Lista de Médicos Asignados en este día -->
-                                    <div class="space-y-1.5 my-auto">
-                                        <template x-for="(doc, idx) in item.assigned_doctors" :key="doc.doctor_id">
-                                            <div class="px-2 py-1 rounded-md text-xs font-semibold text-white shadow-sm flex items-center justify-between gap-1 badge-doctor"
-                                                 :style="`background-color: ${doc.doctor_color};`">
-                                                <div class="flex items-center gap-1.5 truncate">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-white opacity-90 shrink-0"></span>
-                                                    <span class="truncate font-medium" x-text="doc.doctor_name"></span>
-                                                </div>
-                                                <span x-show="item.required_shifts >= 2" class="text-[9px] bg-black/25 px-1 rounded font-mono shrink-0" x-text="`#${idx + 1}`"></span>
+                                <div class="space-y-1">
+                                    <template x-for="(doc, idx) in item.assigned_doctors" :key="doc.doctor_id">
+                                        <div class="px-2.5 py-1.5 rounded-lg text-xs font-semibold text-white shadow-sm flex items-center justify-between gap-2"
+                                             :style="`background-color: ${doc.doctor_color};`">
+                                            <div class="flex items-center gap-1.5 min-w-0">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-white opacity-90 shrink-0"></span>
+                                                <span class="truncate font-medium" x-text="doc.doctor_name"></span>
                                             </div>
-                                        </template>
-
-                                        <!-- Si aún no se ha generado solución -->
-                                        <div x-show="item.required_shifts > 0 && (!item.assigned_doctors || item.assigned_doctors.length === 0)" class="text-[11px] text-slate-400 italic py-2 text-center bg-slate-50 rounded border border-dashed border-slate-200 no-print">
-                                            Sin asignar
+                                            <span x-show="item.required_shifts >= 2" class="text-[10px] bg-black/25 px-1.5 rounded font-mono shrink-0" x-text="`#${idx + 1}`"></span>
                                         </div>
-                                    </div>
+                                    </template>
 
-                                    <!-- Footer de celda: Indicador de día de la semana -->
-                                    <div class="text-[10px] text-slate-400 text-right mt-1 no-print">
-                                        <span x-text="item.weekday_name"></span>
+                                    <div x-show="item.required_shifts > 0 && (!item.assigned_doctors || item.assigned_doctors.length === 0)"
+                                         class="text-xs text-slate-400 italic py-1.5 px-2.5 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                                        Sin asignar
                                     </div>
                                 </div>
                             </div>
-                        </template>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- GRILLA DEL CALENDARIO (7 columnas: siempre visible en >=640px y al Imprimir) -->
+                <div :class="mobileCalendarView === 'list' ? 'hidden sm:block' : 'block'"
+                     class="desktop-grid-view bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden print-container">
+                    <div class="overflow-x-auto custom-scrollbar calendar-scroll-wrapper">
+                        <div class="min-w-[680px] sm:min-w-0">
+                            <!-- Días de la semana header -->
+                            <div class="grid grid-cols-7 bg-slate-50 border-b border-slate-200 text-center py-2.5 text-xs font-bold text-slate-600 tracking-wider uppercase print-weekdays">
+                                <div>Lunes</div>
+                                <div>Martes</div>
+                                <div>Miércoles</div>
+                                <div class="text-purple-700 flex items-center justify-center gap-1">
+                                    <span>Jueves</span>
+                                    <span class="text-[10px] bg-purple-100 text-purple-800 px-1 rounded no-print hidden md:inline">⭐ Clave</span>
+                                </div>
+                                <div>Viernes</div>
+                                <div class="text-blue-700">Sábado</div>
+                                <div class="text-blue-700">Domingo</div>
+                            </div>
+
+                            <!-- Celdas de días con UN SOLO elemento raíz por cada iteración del template -->
+                            <div class="grid grid-cols-7 auto-rows-fr gap-[1px] bg-slate-200 calendar-grid">
+                                <template x-for="item in getCalendarGridDays()" :key="item.empty ? item.id : item.day">
+                                    <div class="calendar-cell min-w-0 overflow-hidden min-h-[108px] p-2 sm:p-2.5 flex flex-col justify-between transition relative border border-slate-100"
+                                         :class="{
+                                             'bg-slate-50/50': item.empty,
+                                             'bg-purple-50/40': !item.empty && item.is_thursday,
+                                             'bg-blue-50/30': !item.empty && item.is_weekend,
+                                             'bg-amber-50/40': !item.empty && item.is_holiday,
+                                             'bg-white': !item.empty && !item.is_thursday && !item.is_weekend && !item.is_holiday
+                                         }">
+
+                                        <!-- Contenido del día -->
+                                        <div x-show="!item.empty" class="w-full h-full flex flex-col justify-between min-w-0">
+                                            <!-- Cabecera de celda: Número de día y badges -->
+                                            <div class="cell-header flex items-start justify-between gap-1 mb-1.5">
+                                                <span class="cell-day-number text-sm sm:text-base font-extrabold shrink-0"
+                                                      :class="{
+                                                          'text-purple-700': item.is_thursday,
+                                                          'text-blue-700': item.is_weekend,
+                                                          'text-amber-800': item.is_holiday,
+                                                          'text-slate-800': !item.is_thursday && !item.is_weekend && !item.is_holiday
+                                                      }"
+                                                      x-text="item.day">
+                                                </span>
+
+                                                <div class="cell-badges flex flex-col items-end gap-0.5 min-w-0">
+                                                    <span x-show="item.required_shifts === 0" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">
+                                                        Libre (0)
+                                                    </span>
+                                                    <span x-show="item.required_shifts === 2" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 border border-blue-200 print-badge-double">
+                                                        Doble (2)
+                                                    </span>
+                                                    <span x-show="item.required_shifts >= 3" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-700 border border-purple-200 print-badge-double">
+                                                        Triple (3)
+                                                    </span>
+
+                                                    <span x-show="item.is_holiday" class="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 border border-amber-200 max-w-[110px] truncate"
+                                                          :title="item.holiday_name"
+                                                          x-text="item.holiday_name || 'Feriado'">
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Lista de Médicos Asignados en este día -->
+                                            <div class="cell-doctors space-y-1.5 my-auto min-w-0">
+                                                <template x-for="(doc, idx) in item.assigned_doctors" :key="doc.doctor_id">
+                                                    <div class="px-2 py-1 rounded-md text-xs font-semibold text-white shadow-sm flex items-center justify-between gap-1 badge-doctor min-w-0"
+                                                         :style="`background-color: ${doc.doctor_color};`">
+                                                        <div class="flex items-center gap-1.5 truncate min-w-0">
+                                                            <span class="w-1.5 h-1.5 rounded-full bg-white opacity-90 shrink-0"></span>
+                                                            <span class="truncate font-medium" x-text="doc.doctor_name"></span>
+                                                        </div>
+                                                        <span x-show="item.required_shifts >= 2" class="text-[9px] bg-black/25 px-1 rounded font-mono shrink-0" x-text="`#${idx + 1}`"></span>
+                                                    </div>
+                                                </template>
+
+                                                <!-- Si aún no se ha generado solución -->
+                                                <div x-show="item.required_shifts > 0 && (!item.assigned_doctors || item.assigned_doctors.length === 0)" class="text-[11px] text-slate-400 italic py-2 text-center bg-slate-50 rounded border border-dashed border-slate-200 no-print">
+                                                    Sin asignar
+                                                </div>
+                                            </div>
+
+                                            <!-- Footer de celda: Indicador de día de la semana -->
+                                            <div class="text-[10px] text-slate-400 text-right mt-1 no-print">
+                                                <span x-text="item.weekday_name"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Tarjeta Informativa de Reglas Cumplidas -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 no-print">
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-base" x-text="defaultTargetShifts"></div>
-                        <div>
-                            <div class="text-xs text-slate-500 font-medium">Cuotas Mensuales</div>
-                            <div class="text-sm font-bold text-slate-900" x-text="`${(totalCapacity / (activeDoctorsCount || 1)).toFixed(1)} prom. / médico`"></div>
+                <!-- Tarjetas Informativas de Reglas Activas -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 no-print">
+                    <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5 sm:gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm sm:text-base shrink-0" x-text="defaultTargetShifts"></div>
+                        <div class="min-w-0">
+                            <div class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Cuotas Mensuales</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-900 truncate" x-text="`${(totalCapacity / (activeDoctorsCount || 1)).toFixed(1)} prom./méd.`"></div>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-lg">24h</div>
-                        <div>
-                            <div class="text-xs text-slate-500 font-medium">Descanso Post-Guardia</div>
-                            <div class="text-sm font-bold text-slate-900">No días consecutivos</div>
+                    <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5 sm:gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm sm:text-base shrink-0">24h</div>
+                        <div class="min-w-0">
+                            <div class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Descanso y Ritmo</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-900 truncate" x-text="avoidThreeInFiveDays ? 'No seguidos • Máx 2/5d' : 'No días consecutivos'"></div>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-lg">⭐</div>
-                        <div>
-                            <div class="text-xs text-slate-500 font-medium">Jueves Deseados</div>
-                            <div class="text-sm font-bold text-slate-900">Reparto equitativo</div>
+                    <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5 sm:gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-base sm:text-lg shrink-0">⭐</div>
+                        <div class="min-w-0">
+                            <div class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Jueves Deseados</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-900 truncate">Reparto equitativo</div>
                         </div>
                     </div>
 
-                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-lg">👥</div>
-                        <div>
-                            <div class="text-xs text-slate-500 font-medium">Guardias Dobles</div>
-                            <div class="text-sm font-bold text-slate-900" x-text="`${days.filter(d => d.required_shifts === 2).length} fechas con 2 médicos`"></div>
+                    <div class="bg-white p-3 sm:p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-2.5 sm:gap-3">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-base sm:text-lg shrink-0">👥</div>
+                        <div class="min-w-0">
+                            <div class="text-[11px] sm:text-xs text-slate-500 font-medium truncate">Guardias Dobles</div>
+                            <div class="text-xs sm:text-sm font-bold text-slate-900 truncate" x-text="`${days.filter(d => d.required_shifts === 2).length} fechas dobles`"></div>
                         </div>
                     </div>
                 </div>
@@ -613,7 +713,7 @@
                             </div>
                         </div>
 
-                        <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-2.5">
                             <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-sm">
                                 <span class="text-xs font-semibold text-slate-700">Cuota base:</span>
                                 <button type="button" @click="defaultTargetShifts = Math.max(0, defaultTargetShifts - 1); scheduleMonthlySave()" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center">-</button>
@@ -629,6 +729,14 @@
                                     <input type="checkbox" x-model="strictQuota" @change="scheduleMonthlySave()" class="sr-only peer">
                                     <div class="relative w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-blue-600"></div>
                                     <span class="ms-2 font-semibold" :class="strictQuota ? 'text-blue-700' : 'text-slate-600'" x-text="strictQuota ? '🔒 Cuota Estricta' : '⚖️ Cuota Flexible'"></span>
+                                </label>
+                            </div>
+
+                            <div class="flex items-center gap-1.5 bg-white px-3 py-1.5 rounded-lg border border-slate-300 shadow-sm text-xs">
+                                <label class="inline-flex items-center cursor-pointer" title="Impide que un mismo médico reciba 3 guardias dentro de cualquier ventana de 5 días consecutivos">
+                                    <input type="checkbox" x-model="avoidThreeInFiveDays" @change="scheduleMonthlySave()" class="sr-only peer">
+                                    <div class="relative w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[1px] after:start-[1px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                    <span class="ms-2 font-semibold" :class="avoidThreeInFiveDays ? 'text-indigo-700' : 'text-slate-500'" x-text="avoidThreeInFiveDays ? '🛡️ Máx. 2 en 5 días' : '⚪ Permitir 3 en 5 días'"></span>
                                 </label>
                             </div>
                         </div>
@@ -920,12 +1028,15 @@
                         </div>
 
                         <template x-if="summary">
-                            <div class="flex items-center gap-3 flex-wrap">
+                            <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
                                 <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold" x-show="summary.strict_quota_met">
                                     ✓ Cuotas 100% Cumplidas
                                 </span>
                                 <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold" x-show="summary.perfect_consecutive_rest">
                                     ✓ Cero Días Consecutivos
+                                </span>
+                                <span class="text-xs px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-bold" x-show="summary.zero_three_in_five_clusters">
+                                    ✓ Máx. 2 Guardias / 5 Días
                                 </span>
                             </div>
                         </template>
@@ -943,6 +1054,7 @@
                                     <th class="py-3 px-4 text-center text-amber-700">Feriados</th>
                                     <th class="py-3 px-4 text-center">Días Bloqueados</th>
                                     <th class="py-3 px-4 text-center">Descanso 24h</th>
+                                    <th class="py-3 px-4 text-center">Máx. 2 en 5d</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-100">
@@ -961,11 +1073,18 @@
                                         <td class="py-3 px-4 text-center font-medium text-slate-700" x-text="stat.weekend_shifts"></td>
                                         <td class="py-3 px-4 text-center font-medium text-slate-700" x-text="stat.holiday_shifts"></td>
                                         <td class="py-3 px-4 text-center text-xs text-slate-500" x-text="`${stat.blocked_days_count} d`"></td>
-                                        <td class="py-3 px-4 text-center">
+                                        <td class="py-3 px-4 text-center whitespace-nowrap">
                                             <span x-show="stat.consecutive_violations === 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
                                                 100% Cumplido
                                             </span>
                                             <span x-show="stat.consecutive_violations > 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800" x-text="`${stat.consecutive_violations} faltas`">
+                                            </span>
+                                        </td>
+                                        <td class="py-3 px-4 text-center whitespace-nowrap">
+                                            <span x-show="!stat.three_in_five_violations" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                                                Cumplido
+                                            </span>
+                                            <span x-show="stat.three_in_five_violations > 0" class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800" x-text="`${stat.three_in_five_violations} ventana(s)`">
                                             </span>
                                         </td>
                                     </tr>
@@ -1027,11 +1146,14 @@
                 </div>
             </template>
 
-            <div class="flex justify-end gap-2 pt-2">
-                <button @click="showErrorModal = false; autoBalanceDoubles()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+            <div class="flex flex-wrap justify-end gap-2 pt-2">
+                <button x-show="avoidThreeInFiveDays" @click="disableThreeInFiveAndRetry()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition">
+                    Permitir '3 en 5 días' y Reintentar
+                </button>
+                <button @click="showErrorModal = false; autoBalanceDoubles()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition">
                     Auto-balancear y Reintentar
                 </button>
-                <button @click="showErrorModal = false" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-4 py-2 rounded-lg transition">
+                <button @click="showErrorModal = false" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-3.5 py-2 rounded-lg transition">
                     Cerrar y Revisar
                 </button>
             </div>

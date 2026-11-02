@@ -47,10 +47,13 @@ def test_solver_standard_6_doctors_42_slots():
     assert resp.success is True, f"El solver falló: {resp.message} - {resp.diagnostics}"
     assert resp.status in ("OPTIMAL", "FEASIBLE")
     
-    # 1. Regla: Cada doctor debe realizar exactamente 7 guardias
+    # 1. Regla: Cada doctor debe realizar exactamente 7 guardias y sin sobrecarga de 3 en 5 días
+    assert resp.summary.get("avoid_three_in_five_enabled") is True
+    assert resp.summary.get("zero_three_in_five_clusters") is True
     for stat in resp.stats:
         assert stat.total_shifts == 7, f"{stat.doctor_name} tiene {stat.total_shifts} guardias en lugar de 7"
         assert stat.consecutive_violations == 0, f"{stat.doctor_name} tuvo violación de días consecutivos"
+        assert stat.three_in_five_violations == 0, f"{stat.doctor_name} tuvo 3 guardias en 5 días"
         
     # 2. Regla: Restricciones personales respetadas
     doc1_days = [day.day for day in resp.schedule if any(a.doctor_id == "doc-1" for a in day.assigned_doctors)]
@@ -216,10 +219,59 @@ def test_flexible_quota_mode():
         
     print("\n[OK] Test Modo Cuota Flexible: Aprobado exitosamente (reparto proporcional y justo).")
 
+def test_avoid_three_in_five_days_toggle():
+    """Verifica que la regla opcional 'No 3 guardias en 5 días' bloquee [1, 3, 5] cuando está activa y lo permita al desactivarse."""
+    year = 2026
+    month = 11  # 30 días
+    doctors = [
+        Doctor(id="doc-1", name="Dr. Único", color="#3B82F6", target_shifts=3, active=True)
+    ]
+    days, _ = build_month_days_config(year, month, "AR")
+    for d in days:
+        d.required_shifts = 1 if d.day in (1, 3, 5) else 0
+
+    # 1. Con avoid_three_in_five_days=True (por defecto): días 1, 3 y 5 caen en una ventana de 5 días -> INFEASIBLE
+    req_strict_window = ScheduleRequest(
+        year=year,
+        month=month,
+        country_code="AR",
+        doctors=doctors,
+        days_config=days,
+        restrictions=[],
+        strict_quota=True,
+        avoid_three_in_five_days=True,
+    )
+    resp_blocked = solve_schedule(req_strict_window)
+    assert resp_blocked.success is False
+    assert resp_blocked.status == "INFEASIBLE"
+    assert any("Evitar 3 guardias en 5 días" in diag for diag in resp_blocked.diagnostics)
+
+    # 2. Con avoid_three_in_five_days=False: se permite asignar 1, 3 y 5 (sin consecutivos) y se informa el indicador
+    req_relaxed_window = ScheduleRequest(
+        year=year,
+        month=month,
+        country_code="AR",
+        doctors=doctors,
+        days_config=days,
+        restrictions=[],
+        strict_quota=True,
+        avoid_three_in_five_days=False,
+    )
+    resp_allowed = solve_schedule(req_relaxed_window)
+    assert resp_allowed.success is True
+    assert resp_allowed.status in ("OPTIMAL", "FEASIBLE")
+    assert resp_allowed.summary["avoid_three_in_five_enabled"] is False
+    assert resp_allowed.summary["zero_three_in_five_clusters"] is False
+    assert resp_allowed.stats[0].total_shifts == 3
+    assert resp_allowed.stats[0].consecutive_violations == 0
+    assert resp_allowed.stats[0].three_in_five_violations >= 1
+    print("\n[OK] Test Regla Opcional 'No 3 guardias en 5 días' (Activa vs Desactivada): Aprobado exitosamente.")
+
 if __name__ == "__main__":
     test_solver_standard_6_doctors_42_slots()
     test_quota_mismatch_error_message()
     test_extreme_ranges_5_and_8_doctors()
     test_custom_variable_quotas_and_zero_shifts()
     test_flexible_quota_mode()
+    test_avoid_three_in_five_days_toggle()
     print("\n[OK] Todos los tests pasaron exitosamente.")

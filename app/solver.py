@@ -130,6 +130,20 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
             # Solo si son días calendario consecutivos
             if d2 == d1 + 1:
                 model.Add(x[doc.id, d1] + x[doc.id, d2] <= 1)
+
+    # 2b. Regla opcional: impedir 3 o más guardias en una ventana de 5 días corridos
+    day_numbers_set = {d.day for d in days_config}
+    max_day_num = max(day_numbers_set) if day_numbers_set else 0
+    if request.avoid_three_in_five_days and max_day_num >= 5:
+        for doc in active_doctors:
+            for start_d in range(1, max_day_num - 3):
+                window_vars = [
+                    x[doc.id, wd]
+                    for wd in range(start_d, start_d + 5)
+                    if wd in day_numbers_set
+                ]
+                if len(window_vars) >= 3:
+                    model.Add(sum(window_vars) <= 2)
                 
     # 3. Restricciones individuales de indisponibilidad
     for doc in active_doctors:
@@ -287,7 +301,9 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
         doctor_wk_counts: Dict[str, int] = {doc.id: 0 for doc in active_doctors}
         doctor_hol_counts: Dict[str, int] = {doc.id: 0 for doc in active_doctors}
         doctor_total_counts: Dict[str, int] = {doc.id: 0 for doc in active_doctors}
+        doctor_assigned_days: Dict[str, set] = {doc.id: set() for doc in active_doctors}
         consecutive_errors: Dict[str, int] = {doc.id: 0 for doc in active_doctors}
+        three_in_five_errors: Dict[str, int] = {doc.id: 0 for doc in active_doctors}
         
         # Para verificar descanso de 24h
         prev_day_doctors = set()
@@ -307,6 +323,7 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
                     ))
                     slot_idx += 1
                     doctor_total_counts[doc.id] += 1
+                    doctor_assigned_days[doc.id].add(day.day)
                     current_day_doctors.add(doc.id)
                     
                     if day.is_thursday:
@@ -333,6 +350,14 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
                 required_shifts=day.required_shifts,
                 assigned_doctors=assigned
             ))
+
+        if max_day_num >= 5:
+            for doc in active_doctors:
+                assigned_set = doctor_assigned_days[doc.id]
+                for start_d in range(1, max_day_num - 3):
+                    count_in_window = sum(1 for wd in range(start_d, start_d + 5) if wd in assigned_set)
+                    if count_in_window >= 3:
+                        three_in_five_errors[doc.id] += 1
             
         # Estadísticas individuales
         stats_output: List[DoctorStats] = []
@@ -347,6 +372,7 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
                 weekend_shifts=doctor_wk_counts[doc.id],
                 holiday_shifts=doctor_hol_counts[doc.id],
                 consecutive_violations=consecutive_errors[doc.id],
+                three_in_five_violations=three_in_five_errors[doc.id],
                 blocked_days_count=len(doctor_blocked_days[doc.id])
             ))
             
@@ -358,6 +384,8 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
             "thursdays_in_month": len(thursday_days),
             "double_shift_days": sum(1 for d in days_config if d.required_shifts == 2),
             "perfect_consecutive_rest": sum(consecutive_errors.values()) == 0,
+            "avoid_three_in_five_enabled": request.avoid_three_in_five_days,
+            "zero_three_in_five_clusters": sum(three_in_five_errors.values()) == 0,
             "strict_quota_met": all(s.total_shifts == s.target_shifts for s in stats_output)
         }
         
@@ -371,13 +399,19 @@ def solve_schedule(request: ScheduleRequest) -> ScheduleResponse:
         )
     else:
         # Infactible o tiempo agotado
+        infeasible_diags = [
+            "Verifique que los profesionales con muchos días bloqueados tengan margen suficiente para completar su cuota sin días consecutivos.",
+            "Revise si los fines de semana o jueves concentran demasiadas restricciones personales que dejan días sin suficientes médicos disponibles.",
+            "Considere liberar temporalmente algún bloqueo personal o flexibilizar los días de guardia doble."
+        ]
+        if request.avoid_three_in_five_days:
+            infeasible_diags.insert(
+                0,
+                "La regla opcional 'Evitar 3 guardias en 5 días' está activa. Si algún profesional tiene muchos días bloqueados en el mes, puede desactivarla para ampliar las combinaciones posibles."
+            )
         return ScheduleResponse(
             success=False,
             status="INFEASIBLE",
-            message="No existe una combinación posible que cumpla simultáneamente con la cuota de 7 guardias, el descanso obligatorio de 24h y los bloqueos personales configurados.",
-            diagnostics=[
-                "Verifique que los profesionales con muchos días bloqueados tengan margen suficiente para completar 7 guardias sin días consecutivos.",
-                "Revise si los fines de semana o jueves concentran demasiadas restricciones personales que dejan días sin suficientes médicos disponibles.",
-                "Considere liberar temporalmente algún bloqueo personal o flexibilizar los días de guardia doble."
-            ]
+            message="No existe una combinación posible que cumpla simultáneamente con las cuotas mensuales, el descanso obligatorio de 24h, las reglas de espaciado y los bloqueos personales configurados.",
+            diagnostics=infeasible_diags
         )
